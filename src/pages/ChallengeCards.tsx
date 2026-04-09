@@ -7,129 +7,102 @@ interface ChallengeCard {
   number: string;
   company: string;
   title: string;
-  context: string;
+  context: string[];
   coreChallenge: string;
-  painPoints: string[];
-  whyItMatters: string;
+  tension: string;
   opportunityAngle: string;
-  opportunityItems: string[];
+  successMetrics: string[];
 }
 
 const challenges: ChallengeCard[] = [
   {
     number: "1",
-    company: "Danske Bank",
-    title: "Scaling GenAI Without Creating Regulatory Risk Debt",
-    context: "Danske Bank is aggressively scaling GenAI (74% employee adoption) while operating under high AML scrutiny and strict regulatory expectations.",
-    coreChallenge: "How might Danske Bank convert GenAI adoption into measurable productivity gains while ensuring AML compliance, risk governance, and auditability?",
-    painPoints: [
-      "AML risk assessment gaps flagged by regulator",
-      "Lack of closed-loop compliance governance",
-      "Unmeasured GenAI productivity benefits",
-      "Cost discipline vs heavy tech investment pressure",
+    company: "OP Pohjola",
+    title: "Responsible AI at Scale (Banking & Regulated Industries)",
+    context: [
+      "AI-first strategy with AI assistants already live",
+      "Rising ICT spend (cybersecurity + data protection)",
+      "Strong regulatory pressure (ESG, CSRD, fraud risk)",
     ],
-    whyItMatters: "Failure leads to regulatory penalties + operational friction + wasted AI investments",
-    opportunityAngle: "Build a governed GenAI + AML intelligence layer that links:",
-    opportunityItems: ["Risk → Controls → Evidence → Audit"],
+    coreChallenge: "How do we scale AI across customer and employee journeys while ensuring trust, compliance, and measurable business value?",
+    tension: "Speed of AI innovation vs. regulatory risk, auditability, and customer trust",
+    opportunityAngle: "Build a bank-grade AI operating model (governance + platform + value tracking)",
+    successMetrics: [
+      "Reduced fraud losses",
+      "Improved cost-to-income ratio",
+      "Faster AI deployment cycles",
+    ],
   },
   {
     number: "2",
-    company: "Salling Group",
-    title: "Scaling Retail Growth Without Losing Margin & CX Consistency",
-    context: "Aspire '28 targets DKK 100bn revenue, expansion across geographies, and heavy M&A.",
-    coreChallenge: "How might Salling Group scale internationally and integrate acquisitions while maintaining operational efficiency and consistent customer experience?",
-    painPoints: [
-      "Cross-border integration complexity (Rimi Baltic, expansion markets)",
-      "Margin pressure in grocery retail",
-      "Cloud adoption instability impacting operations",
-      "Fragmented customer experience across banners",
+    company: "Euroclear Finland",
+    title: "Post-Transformation Value Realization (Capital Markets Infra)",
+    context: [
+      "T2S migration completed",
+      "Unified platform (TCS BaNCS)",
+      "High operational complexity across market participants",
     ],
-    whyItMatters: "Growth without integration → synergy leakage + CX inconsistency + margin erosion",
-    opportunityAngle: "Create a unified retail operating model:",
-    opportunityItems: [
-      "Omnichannel personalization",
-      "Integration factory for acquisitions",
-      "AI-driven demand & pricing optimization",
+    coreChallenge: "After major platform modernization (T2S), how do we unlock sustained efficiency and reduce ecosystem friction?",
+    tension: "Modern platform exists, but manual exceptions + participant friction still persist",
+    opportunityAngle: "Drive \"next-horizon efficiency\" via automation, observability, and data services",
+    successMetrics: [
+      "Reduced settlement failures",
+      "Lower cost-to-serve for participants",
+      "Faster onboarding and processing",
     ],
   },
   {
     number: "3",
-    company: "DSV A/S",
-    title: "Turning Scale Into Advantage Post-Mega Acquisition",
-    context: "DSV is integrating Schenker, while managing a 200,000+ partner ecosystem.",
-    coreChallenge: "How might DSV integrate Schenker and unify its digital ecosystem to turn scale into a customer experience advantage instead of an operational burden?",
-    painPoints: [
-      "Large-scale integration risk (Schenker)",
-      "Dependency on subcontractors (quality variability)",
-      "Rising expectations for real-time visibility",
-      "Manual processes in operations",
+    company: "Kesko",
+    title: "Digital Core Modernization Without Business Disruption (Retail)",
+    context: [
+      "Largest IT transformation in company history",
+      "Multi-partner ecosystem",
+      "Strong push on AI, personalization, and automation",
     ],
-    whyItMatters: "Poor integration → customer churn + delayed synergies + operational inefficiencies",
-    opportunityAngle: "Build a digital control tower + integration factory:",
-    opportunityItems: [
-      "Unified APIs & data layer",
-      "Predictive exception handling",
-      "Partner performance intelligence",
+    coreChallenge: "How do we modernize SAP + digital core while ensuring zero disruption to stores, logistics, and customer experience?",
+    tension: "Transformation scale vs. day-to-day retail execution stability",
+    opportunityAngle: "Build an AI-powered digital core (SAP S/4 + data + AIOps)",
+    successMetrics: [
+      "Reduced waste and stockouts",
+      "Improved availability and fulfillment",
+      "Faster time-to-market for features",
     ],
   },
   {
     number: "4",
-    company: "Vestas Wind Systems",
-    title: "Delivering Record Backlog While Recovering Margins",
-    context: "Vestas has a €68B backlog but faces ramp-up cost pressures and service margin challenges.",
-    coreChallenge: "How might Vestas scale manufacturing and service operations efficiently to deliver backlog while improving profitability?",
-    painPoints: [
-      "Manufacturing ramp-up inefficiencies",
-      "Rising service costs",
-      "Supply chain disruptions & geopolitical risks",
-      "Balancing capex with shareholder returns",
+    company: "DNA",
+    title: "Cloud Transformation with Reliability & Cost Discipline (Telecom)",
+    context: [
+      "5-year TCS partnership",
+      "100+ apps migrating in 24 months",
+      "AI depends on cloud data platform",
     ],
-    whyItMatters: "Execution failure → margin erosion + delayed delivery + customer dissatisfaction",
-    opportunityAngle: "Enable AI-driven industrial intelligence:",
-    opportunityItems: [
-      "Digital twin for manufacturing",
-      "Predictive service optimization",
-      "Supply chain resilience analytics",
+    coreChallenge: "How do we migrate 80% of enterprise apps to cloud while maintaining telecom-grade reliability and controlling costs?",
+    tension: "Speed of migration vs. risk of outages, security gaps, and cost overruns",
+    opportunityAngle: "Establish a cloud migration factory with control tower + FinOps + AI-ready data platform",
+    successMetrics: [
+      "Reduced run costs",
+      "Improved deployment velocity",
+      "Zero major service disruptions",
     ],
   },
   {
     number: "5",
-    company: "TDC Group / Nuuday",
-    title: "Breaking Free from Legacy to Enable Next-Gen Telecom",
-    context: "Nuuday is replacing legacy systems (e.g., Columbus from the 1980s) with the Dawn platform.",
-    coreChallenge: "How might TDC/Nuuday modernize legacy IT at scale while ensuring business continuity and improved customer experience?",
-    painPoints: [
-      "Deep-rooted legacy systems driving core operations",
-      "Long-running transformation with high complexity",
-      "Dependency on existing vendors (e.g., Infosys at TDC NET)",
-      "Risk of transformation fatigue and delays",
+    company: "Kalmar",
+    title: "Post-Separation IT & Service Monetization (Industrial / Manufacturing)",
+    context: [
+      "Independent company (post-2024 demerger)",
+      "€50M efficiency target by 2026",
+      "Strong focus on automation, electrification, and digitalization",
     ],
-    whyItMatters: "Slow modernization → high costs, low agility, poor CX",
-    opportunityAngle: "Design a phased, AI-assisted legacy transformation:",
-    opportunityItems: [
-      "Platform migration acceleration",
-      "Intelligent process abstraction",
-      "Customer journey re-engineering",
-    ],
-  },
-  {
-    number: "6",
-    company: "Ørsted",
-    title: "Balancing Green Transition with Financial Discipline",
-    context: "Ørsted operates in renewable energy with large-scale investments and market volatility pressures.",
-    coreChallenge: "How might Ørsted optimize capital allocation and project execution while scaling renewable energy and managing financial risk?",
-    painPoints: [
-      "Capital-intensive project portfolio",
-      "Market volatility (energy pricing, regulation)",
-      "Complex asset lifecycle management",
-      "ESG reporting and compliance expectations",
-    ],
-    whyItMatters: "Inefficiency → cost overruns + reduced investor confidence",
-    opportunityAngle: "Build a digital asset intelligence platform:",
-    opportunityItems: [
-      "Predictive project performance",
-      "ESG-linked financial analytics",
-      "Portfolio optimization AI",
+    coreChallenge: "How do we simplify IT post-demerger while enabling new revenue streams from connected equipment and services?",
+    tension: "Cost reduction vs. continued innovation and service growth",
+    opportunityAngle: "Create a unified digital core + data-driven service platform",
+    successMetrics: [
+      "IT cost reduction",
+      "Increased recurring service revenue",
+      "Faster innovation cycles",
     ],
   },
 ];
@@ -140,20 +113,19 @@ function formatCardText(card: ChallengeCard): string {
     `Challenge Card: "${card.title}"`,
     "",
     "Context:",
-    card.context,
+    ...card.context.map((c) => `● ${c}`),
     "",
     "Core Challenge:",
     card.coreChallenge,
     "",
-    "Key Pain Points:",
-    ...card.painPoints.map((p) => `● ${p}`),
-    "",
-    "Why It Matters:",
-    card.whyItMatters,
+    "Tension:",
+    card.tension,
     "",
     "Opportunity Angle:",
     card.opportunityAngle,
-    ...card.opportunityItems.map((o) => `● ${o}`),
+    "",
+    "Success Metrics:",
+    ...card.successMetrics.map((m) => `● ${m}`),
   ];
   return lines.join("\n");
 }
@@ -232,7 +204,7 @@ const ChallengeCards = () => {
               </h2>
 
               <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                {card.context}
+                {card.coreChallenge}
               </p>
             </button>
           ))}
@@ -274,33 +246,32 @@ const ChallengeCards = () => {
             <h2 className="text-2xl font-bold font-display text-card-foreground mb-5 pr-16">{selected.title}</h2>
 
             <Section label="Context">
-              <p className="text-sm text-muted-foreground leading-relaxed">{selected.context}</p>
+              <ul className="space-y-1.5">
+                {selected.context.map((c, i) => (
+                  <li key={i} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
+                    <span className="text-primary mt-0.5 shrink-0">●</span> {c}
+                  </li>
+                ))}
+              </ul>
             </Section>
 
             <Section label="Core Challenge">
               <p className="text-sm text-card-foreground leading-relaxed font-medium italic">{selected.coreChallenge}</p>
             </Section>
 
-            <Section label="Key Pain Points">
-              <ul className="space-y-1.5">
-                {selected.painPoints.map((p, i) => (
-                  <li key={i} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
-                    <span className="text-destructive mt-0.5 shrink-0">●</span> {p}
-                  </li>
-                ))}
-              </ul>
+            <Section label="Tension">
+              <p className="text-sm text-muted-foreground leading-relaxed">{selected.tension}</p>
             </Section>
 
-            <Section label="Why It Matters">
-              <p className="text-sm text-muted-foreground leading-relaxed">{selected.whyItMatters}</p>
+            <Section label="Opportunity Angle">
+              <p className="text-sm text-card-foreground leading-relaxed font-medium">{selected.opportunityAngle}</p>
             </Section>
 
-            <Section label="Opportunity Angle" last>
-              <p className="text-sm text-card-foreground leading-relaxed font-medium mb-2">{selected.opportunityAngle}</p>
+            <Section label="Success Metrics" last>
               <ul className="space-y-1.5">
-                {selected.opportunityItems.map((o, i) => (
+                {selected.successMetrics.map((m, i) => (
                   <li key={i} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
-                    <span className="text-primary mt-0.5 shrink-0">●</span> {o}
+                    <span className="text-primary mt-0.5 shrink-0">●</span> {m}
                   </li>
                 ))}
               </ul>

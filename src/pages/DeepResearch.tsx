@@ -13,8 +13,8 @@ const DeepResearch = () => {
 
   const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = "/documents/Deep_Research_TCS_Denmark.pdf";
-    link.download = "TCS_Denmark_Customer_Intelligence_Report.pdf";
+    link.href = "/documents/Executive Research Pack_ TCS Finland Top Accounts Workshop Intelligence.pdf";
+    link.download = "Executive Research Pack_ TCS Finland Top Accounts Workshop Intelligence.pdf";
     link.click();
   };
 
@@ -48,9 +48,9 @@ const DeepResearch = () => {
       <div className="flex-1 p-4">
         <div className="max-w-5xl mx-auto h-[calc(100vh-100px)] bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <iframe
-            src="/documents/Deep_Research_TCS_Denmark.pdf"
+            src="/documents/Executive Research Pack_ TCS Finland Top Accounts Workshop Intelligence.pdf"
             className="w-full h-full"
-            title="TCS Denmark Customer Intelligence Report"
+            title="TCS Finland Customer Intelligence Report"
           />
         </div>
       </div>
