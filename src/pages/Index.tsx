@@ -33,7 +33,7 @@ const Index = () => {
       <div className="max-w-6xl w-full animate-fade-in">
         <div className="text-center mb-12">
           <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground mb-3">
-            TCS Finland &bull; Customer Intelligence
+            TCS Finland
           </p>
           <h1 className="text-4xl md:text-5xl font-bold font-display text-foreground mb-4">
             AI Immersion Day
