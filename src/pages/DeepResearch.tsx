@@ -3,18 +3,21 @@ import { ArrowLeft, Download, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const AI_TOOLS = [
+  { name: "Open Claude", url: "https://claude.ai", color: "bg-claude hover:bg-claude/90 text-primary-foreground" },
   { name: "Open ChatGPT", url: "https://chat.openai.com", color: "bg-chatgpt hover:bg-chatgpt/90 text-primary-foreground" },
   { name: "Open Gemini", url: "https://gemini.google.com", color: "bg-gemini hover:bg-gemini/90 text-primary-foreground" },
-  { name: "Open Copilot", url: "https://copilot.microsoft.com", color: "bg-claude hover:bg-claude/90 text-primary-foreground" },
+  { name: "Open Copilot", url: "https://copilot.microsoft.com", color: "bg-slate-600 hover:bg-slate-600/90 text-primary-foreground" },
 ];
 
 const DeepResearch = () => {
   const navigate = useNavigate();
 
+  const PDF_PATH = "/documents/TSF Group - Consolidated AI Immersion Knowledge Pack.pdf";
+
   const handleDownload = () => {
     const link = document.createElement("a");
-    link.href = "/documents/Executive Research Pack_ TCS Finland Top Accounts Workshop Intelligence.pdf";
-    link.download = "Executive Research Pack_ TCS Finland Top Accounts Workshop Intelligence.pdf";
+    link.href = PDF_PATH;
+    link.download = "TSF Group - Consolidated AI Immersion Knowledge Pack.pdf";
     link.click();
   };
 
@@ -27,7 +30,7 @@ const DeepResearch = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
-            <h1 className="text-lg font-semibold font-display text-card-foreground">Customer Intelligence Report</h1>
+            <h1 className="text-lg font-semibold font-display text-card-foreground">Consolidated AI Immersion Knowledge Pack</h1>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={handleDownload}>
@@ -48,9 +51,9 @@ const DeepResearch = () => {
       <div className="flex-1 p-4">
         <div className="max-w-5xl mx-auto h-[calc(100vh-100px)] bg-card rounded-xl border border-border shadow-sm overflow-hidden">
           <iframe
-            src="/documents/Executive Research Pack_ TCS Finland Top Accounts Workshop Intelligence.pdf"
+            src={PDF_PATH}
             className="w-full h-full"
-            title="TCS Finland Customer Intelligence Report"
+            title="TSF Group Consolidated AI Immersion Knowledge Pack"
           />
         </div>
       </div>

@@ -1,56 +1,93 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Check, Maximize, X } from "lucide-react";
+import { ArrowLeft, Copy, Check, Maximize, X, CheckCircle2, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { COMPANY, formatChallengeCard, getSelectedChallenge, type Challenge } from "@/data/challenges";
 
-const prompts = [
+const promptTemplates = [
   {
     step: 0,
     label: "Learn",
-    text: `Here is the TCS Finland Customer Intelligence Report for the account we are going to discuss today. No action required. Use this report as additional context for your responses apart from web search and other resources.`,
+    text: `Here is a Deep research report for the topic we are going to discuss today.
+No action required. Use this as additional context for your responses apart from web search and other resources.`,
   },
   {
     step: 1,
     label: "Widen",
-    text: `Act as a research aide for the [selected challenge].  List key personas, top pains, current workarounds, and success metrics.
+    text: `Act as a research aide for {{company}} on the {{challenge}} challenge. List key personas, top pains, current workarounds, and success metrics.
 Return 5 insights & 3 risks tailored to this challenge context.`,
   },
   {
     step: 2,
     label: "Diagnose",
-    text: `Let's pick the [top pain-point] for this challenge.  For this pain, run a Five Whys.
-Propose 3 root-cause hypotheses and the disproof evidence for each. Specify the minimum data cut & owners to pull.
+    text: `Let's pick the top [#] pains for this challenge. For each of these listed top pains, run an individual Five Whys.
+
+For each pain point, propose 3 root-cause hypotheses and the disproof evidence for each.
+
+Specify the minimum data cut & owners to pull.
+
 Output a root-cause map, test plan, and privacy constraints.`,
   },
   {
     step: 3,
     label: "Ideate",
-    text: `Generate and Cluster possible AI driven ideas into 3 Options:
-1.Process (policy, ways of working),
-2.Analytics/ML (forecast, optimise, recommend),
-3.AI & Automation (Computer Vision, Retrieval Augmented Generation, Agentic AI, etc.).
-Score each on Impact × Feasibility × Confidence × Time-to-Value. Recommend one pilot with the smallest integration surface and clearest value proof.`,
+    text: `Generate and Cluster possible AI driven ideas into 3 Options. Generate 5 ideas in each cluster:
+
+1. Process (policy, ways of working),
+
+2. Analytics/ML (forecast, optimise, recommend),
+
+3. Automation (CV, RAG/Co-Pilot, tasking).
+
+Score each on Impact × Feasibility × Confidence × Time-to-Value.
+
+Recommend one pilot with the smallest integration surface and clearest value proof to ${COMPANY}.`,
   },
   {
     step: 4,
     label: "Brief",
-    text: `For the recommended pilot, create a one-page pilot brief including:  Target user(s), problem statement, success metrics & baselines, target uplift, key flow (5–7 steps), screens/components, sample UI copy, representative sample data, integration points, and relevant guardrails ((domain specific regulation boundaries, bias tests, fallback behaviour, etc.).`,
+    text: `For option [#], create a one-page pilot brief including:
+
+Target user(s), problem statement, success metrics & baselines, target uplift,
+
+key flow (5–7 steps), screens/components, sample UI copy,
+
+representative sample data, integration points, and relevant guardrails
+
+(GDPR/PCI, domain specific regulation boundaries, bias tests, fallback behaviour)`,
   },
   {
     step: 5,
     label: "Build",
-    text: `You are a product design expert. Using only the brief above, write a single [platform] product requirements prompt that includes Product name + one liner description (actions, process, capabilities), who it's for, screens + key components, brand colors, main user flow, sample data, concise headlines/CTAs, UI instructions, success metric card, constraints (no PII). Return the [platform] prompt only`,
+    text: `You are a product design expert. Using only the brief above, write a single [platform] product requirements prompt for {{company}} that includes Product name + one liner description (actions, process, capabilities), who it's for, screens + key components, brand colors, main user flow, sample data, concise headlines/CTAs, UI instructions, success metric card, constraints (no PII). Return the [platform] prompt only`,
   },
 ];
+
+function fill(text: string, challenge: Challenge | null): string {
+  const challengeToken = challenge
+    ? `"${challenge.title}\n\n${challenge.statement}"`
+    : "[selected challenge]";
+  return text.replaceAll("{{company}}", COMPANY).replaceAll("{{challenge}}", challengeToken);
+}
 
 const Prompts = () => {
   const navigate = useNavigate();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedCard, setCopiedCard] = useState(false);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [showCardImage, setShowCardImage] = useState(false);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+
+  useEffect(() => {
+    setChallenge(getSelectedChallenge());
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowFullscreen(false);
+      if (e.key === "Escape") {
+        setShowFullscreen(false);
+        setShowCardImage(false);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -61,6 +98,15 @@ const Prompts = () => {
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   }, []);
+
+  const handleCopyCard = useCallback(async () => {
+    if (!challenge) return;
+    await navigator.clipboard.writeText(formatChallengeCard(challenge));
+    setCopiedCard(true);
+    setTimeout(() => setCopiedCard(false), 2000);
+  }, [challenge]);
+
+  const prompts = promptTemplates.map((p) => ({ ...p, text: fill(p.text, challenge) }));
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
@@ -76,10 +122,72 @@ const Prompts = () => {
         </div>
       </header>
 
+      {/* Anchor banner */}
+      <div className="shrink-0 border-b border-border bg-muted/30 px-4 py-2.5">
+        <div className="max-w-[1600px] mx-auto flex items-start justify-between gap-3 flex-wrap">
+          {challenge ? (
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap text-sm">
+                <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                <span className="text-muted-foreground">Prompts anchored to</span>
+                <span className="inline-flex items-center justify-center rounded bg-primary px-2 py-0.5 text-[11px] font-bold text-primary-foreground">
+                  {challenge.table} · {challenge.type[0]}
+                </span>
+                <b className="text-card-foreground font-semibold">{challenge.title}</b>
+                <span className="text-muted-foreground">· {challenge.domain} · Impact {challenge.impact} · {COMPANY}</span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed line-clamp-2 max-w-[80ch]">
+                {challenge.statement}
+              </p>
+            </div>
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              No challenge selected — placeholders show <code className="text-xs">[selected challenge]</code>. Pick one to
+              personalise every prompt.
+            </span>
+          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {challenge && (
+              <>
+                <button
+                  onClick={() => setShowCardImage(true)}
+                  className="relative shrink-0 rounded-md overflow-hidden border border-border hover:border-primary/50 transition-colors group"
+                  title="View challenge card"
+                >
+                  <img src={challenge.image} alt="" className="h-11 w-auto max-w-[150px] object-cover" />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Maximize className="h-4 w-4 text-white" />
+                  </span>
+                </button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyCard}
+                  className={copiedCard ? "text-green-600 border-green-300" : ""}
+                >
+                  {copiedCard ? (
+                    <>
+                      <Check className="h-4 w-4 mr-1" /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-1" /> Copy challenge card
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" size="sm" onClick={() => navigate("/challenge-cards")}>
+              <LayoutGrid className="h-4 w-4 mr-1" /> {challenge ? "Change challenge" : "Pick a challenge"}
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Main content: Image left, All prompts right */}
       <div className="flex-1 min-h-0">
         <div className="max-w-[1600px] mx-auto h-full p-4 flex gap-5">
-          {/* Left: Image – sticky, stretched vertically */}
+          {/* Left: Image */}
           <div className="w-[45%] shrink-0 rounded-lg border border-border overflow-hidden bg-black relative hidden lg:flex flex-col">
             <div className="w-full h-full bg-black flex items-center justify-center">
               <img
@@ -177,6 +285,28 @@ const Prompts = () => {
           <button
             onClick={() => setShowFullscreen(false)}
             className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Challenge card fullscreen overlay */}
+      {showCardImage && challenge && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-6"
+          onClick={() => setShowCardImage(false)}
+        >
+          <img
+            src={challenge.image}
+            alt={`${challenge.title} — challenge card`}
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setShowCardImage(false)}
+            title="Close (Esc)"
+            className="absolute top-4 right-4 h-11 w-11 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
           >
             <X className="h-5 w-5" />
           </button>

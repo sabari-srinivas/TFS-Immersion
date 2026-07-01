@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSF Group — AI Immersion Day (Final Challenges)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #6FA0D4;
+    --accent-deep: #4189C6;
+    --accent-soft: #1a2733;
+    --accent-line: rgba(111, 160, 212, 0.35);
+
+    --ink-on-dark: #ffffff;
+    --ink-on-light: #0e1116;
+    --muted-on-dark: #9ca1a8;
+    --muted-on-light: #5a5a5a;
+    --faint-on-dark: #6a6e74;
+    --faint-on-light: #8a8f97;
+
+    --bg-dark: #0a0c10;
+    --bg-light: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-dark);
+    color: var(--ink-on-dark);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ---------- DECK SHELL ---------- */
+  .deck { position: fixed; inset: 0; overflow: hidden; }
+
+  .track {
+    display: flex;
+    height: 100%;
+    width: 3400%; /* 34 slides */
+    transition: transform 0.55s cubic-bezier(0.7, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .slide {
+    width: calc(100% / 34);
+    height: 100%;
+    flex-shrink: 0;
+    padding: clamp(44px, 5.5vw, 96px) clamp(56px, 8vw, 140px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-dark);
+    color: var(--ink-on-dark);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-line) transparent;
+  }
+  .slide.light { background: var(--bg-light); color: var(--ink-on-light); }
+  .slide::-webkit-scrollbar { width: 9px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--accent-line); border-radius: 6px; }
+  .slide::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ---------- PERSISTENT CHROME ---------- */
+  .chrome { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  .chrome > * { pointer-events: auto; }
+
+  .logo {
+    position: absolute;
+    top: clamp(24px, 2.8vw, 40px);
+    left: clamp(32px, 4vw, 64px);
+    transition: opacity 0.4s ease;
+  }
+  .logo svg {
+    height: clamp(24px, 2.4vw, 34px);
+    width: auto;
+    display: block;
+    color: var(--logo-color, #ffffff);
+    transition: color 0.4s ease;
+  }
+  .logo svg path { fill: currentColor; }
+
+  body[data-theme="dark"] { --logo-color: #ffffff; }
+  body[data-theme="light"] { --logo-color: #0e1116; }
+
+  .counter {
+    position: absolute;
+    top: clamp(26px, 2.8vw, 40px);
+    right: clamp(32px, 4vw, 64px);
+    font-size: clamp(11px, 1vw, 13px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--counter-color, var(--faint-on-dark));
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.4s ease;
+  }
+  .counter b { font-weight: 700; color: var(--counter-bold, #fff); transition: color 0.4s ease; }
+  body[data-theme="dark"] { --counter-color: #6a6e74; --counter-bold: #ffffff; }
+  body[data-theme="light"] { --counter-color: #8a8f97; --counter-bold: #0e1116; }
+
+  .nav-buttons {
+    position: absolute;
+    bottom: clamp(24px, 2.6vw, 36px);
+    right: clamp(32px, 4vw, 64px);
+    display: flex;
+    gap: 10px;
+  }
+  .nav-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-border, rgba(255,255,255,0.18));
+    background: transparent;
+    color: var(--btn-color, rgba(255,255,255,0.75));
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+    font-family: inherit;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  body[data-theme="dark"] { --btn-border: rgba(255,255,255,0.18); --btn-color: rgba(255,255,255,0.75); }
+  body[data-theme="light"] { --btn-border: rgba(0,0,0,0.12); --btn-color: rgba(0,0,0,0.55); }
+
+  /* ---------- SHARED TYPE ---------- */
+  .eyebrow {
+    font-size: clamp(11px, 1vw, 14px);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: clamp(24px, 3vw, 44px);
+  }
+  .slide.light .eyebrow { color: var(--accent-deep); }
+
+  h1.hero-xl { font-size: clamp(56px, 9vw, 160px); font-weight: 800; line-height: 0.95; letter-spacing: -0.035em; }
+  h1.hero { font-size: clamp(52px, 7.5vw, 120px); font-weight: 800; line-height: 1.0; letter-spacing: -0.028em; }
+  h2.heading { font-size: clamp(40px, 5.4vw, 88px); font-weight: 800; line-height: 1.04; letter-spacing: -0.024em; margin-bottom: clamp(20px, 2vw, 32px); }
+  h2.heading-md { font-size: clamp(32px, 4.4vw, 64px); font-weight: 700; line-height: 1.06; letter-spacing: -0.022em; margin-bottom: clamp(18px, 1.8vw, 28px); }
+  h2.heading-sm { font-size: clamp(28px, 3.6vw, 52px); font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: clamp(16px, 1.6vw, 24px); }
+  .lede { font-size: clamp(20px, 1.9vw, 30px); font-weight: 400; color: var(--muted-on-dark); line-height: 1.4; max-width: 36ch; }
+  .slide.light .lede { color: var(--muted-on-light); }
+
+  .accent { color: var(--accent); }
+  .accent-deep { color: var(--accent-deep); }
+  .italic { font-style: italic; }
+
+  .quote-glyph { width: clamp(48px, 4.5vw, 80px); height: auto; color: var(--accent); margin-bottom: clamp(28px, 3.6vw, 56px); }
+
+  /* ---------- COVER ---------- */
+  .slide-cover { justify-content: center; }
+  .slide-cover .hero { font-size: clamp(56px, 8.6vw, 150px); line-height: 0.94; }
+  .slide-cover .lede { margin-top: clamp(28px, 3vw, 44px); max-width: 42ch; }
+  .slide-cover .meta { margin-top: clamp(40px, 5vw, 72px); display: flex; gap: clamp(20px, 3vw, 56px); flex-wrap: wrap; }
+  .slide-cover .meta-item { border-left: 2px solid var(--accent); padding-left: 16px; }
+  .slide-cover .meta-label { font-size: clamp(10px, 0.9vw, 12px); letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint-on-dark); font-weight: 600; margin-bottom: 6px; }
+  .slide-cover .meta-value { font-size: clamp(15px, 1.4vw, 20px); font-weight: 600; color: var(--ink-on-dark); }
+
+  /* ---------- TWO-COLUMN ---------- */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(36px, 4vw, 72px); flex: 1; align-items: start; margin-top: clamp(20px, 2vw, 32px); }
+  .two-col .col-narrative { font-size: clamp(15px, 1.25vw, 19px); line-height: 1.55; color: var(--muted-on-dark); max-width: 52ch; }
+  .slide.light .two-col .col-narrative { color: var(--muted-on-light); }
+  .two-col .col-narrative p + p { margin-top: clamp(12px, 1.2vw, 18px); }
+  .two-col .col-narrative strong { color: var(--ink-on-dark); font-weight: 700; }
+  .slide.light .two-col .col-narrative strong { color: var(--ink-on-light); }
+
+  /* ---------- METRIC GRID ---------- */
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 1.4vw, 22px); }
+  .metric-card { border: 1px solid var(--accent-line); border-radius: 8px; padding: clamp(16px, 1.6vw, 24px) clamp(18px, 1.8vw, 28px); background: rgba(111, 160, 212, 0.06); }
+  .slide.light .metric-card { background: #f6f8fb; border-color: #dde3ea; }
+  .metric-label { font-size: clamp(10px, 0.9vw, 12px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint-on-dark); font-weight: 600; margin-bottom: 8px; }
+  .slide.light .metric-label { color: var(--faint-on-light); }
+  .metric-value { font-size: clamp(20px, 2.2vw, 32px); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; color: var(--ink-on-dark); }
+  .slide.light .metric-value { color: var(--ink-on-light); }
+  .metric-sub { font-size: clamp(11px, 1vw, 14px); color: var(--muted-on-dark); margin-top: 6px; }
+  .slide.light .metric-sub { color: var(--muted-on-light); }
+
+  /* ---------- THEMED LISTS ---------- */
+  .theme-list { list-style: none; margin-top: clamp(8px, 1vw, 14px); }
+  .theme-list li { padding: clamp(12px, 1.2vw, 18px) 0 clamp(12px, 1.2vw, 18px) clamp(40px, 3.5vw, 56px); position: relative; font-size: clamp(15px, 1.3vw, 19px); color: var(--muted-on-dark); line-height: 1.45; border-top: 1px solid rgba(255,255,255,0.08); }
+  .slide.light .theme-list li { color: var(--muted-on-light); border-top-color: rgba(0,0,0,0.08); }
+  .theme-list li:first-child { border-top: none; padding-top: clamp(4px, 0.6vw, 8px); }
+  .theme-list li strong { color: var(--ink-on-dark); font-weight: 700; }
+  .slide.light .theme-list li strong { color: var(--ink-on-light); }
+  .theme-list.numbered { counter-reset: tlc; }
+  .theme-list.numbered li { counter-increment: tlc; }
+  .theme-list.numbered li::before { content: counter(tlc, decimal-leading-zero); position: absolute; left: 0; top: clamp(12px, 1.2vw, 18px); font-size: clamp(13px, 1.05vw, 17px); font-weight: 700; color: var(--accent); letter-spacing: 0.06em; }
+  .slide.light .theme-list.numbered li::before { color: var(--accent-deep); }
+  .theme-list.numbered li:first-child::before { top: clamp(4px, 0.6vw, 8px); }
+
+  /* ---------- CHALLENGE INDEX GRID ---------- */
+  .ci-grid { margin-top: clamp(24px, 2.4vw, 36px); flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; gap: clamp(12px, 1.2vw, 18px); align-content: start; }
+  .ci-card { border: 1px solid var(--accent-line); border-radius: 8px; padding: clamp(14px, 1.4vw, 22px); background: rgba(111, 160, 212, 0.06); display: flex; flex-direction: column; gap: 8px; transition: all 0.25s ease; min-height: 0; }
+  .ci-card:hover { background: rgba(111, 160, 212, 0.14); transform: translateY(-2px); }
+  .ci-num { font-size: clamp(11px, 0.95vw, 13px); letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  .ci-title { font-size: clamp(14px, 1.2vw, 18px); font-weight: 700; color: var(--ink-on-dark); line-height: 1.2; letter-spacing: -0.01em; }
+  .ci-domain { font-size: clamp(10px, 0.85vw, 12px); color: var(--muted-on-dark); margin-top: auto; letter-spacing: 0.06em; }
+
+  /* ---------- CHALLENGE DETAIL ---------- */
+  .challenge-detail { justify-content: flex-start; }
+  .challenge-detail .ch-tag { display: inline-flex; align-items: center; gap: 14px; font-size: clamp(11px, 1vw, 14px); letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--accent); margin-bottom: clamp(20px, 2vw, 32px); }
+  .challenge-detail .ch-tag .ch-num { background: var(--accent); color: var(--bg-dark); padding: 4px 10px; border-radius: 4px; font-weight: 800; letter-spacing: 0.08em; }
+  .challenge-detail .ch-tag .ch-domain { color: var(--faint-on-dark); border-left: 1px solid rgba(255,255,255,0.18); padding-left: 14px; }
+  .challenge-detail .ch-statement { font-size: clamp(26px, 3.3vw, 50px); font-weight: 800; line-height: 1.08; letter-spacing: -0.022em; margin-bottom: clamp(28px, 3vw, 44px); max-width: 30ch; }
+  .challenge-detail .ch-statement .accent { color: var(--accent); }
+  .challenge-detail .ch-grid { flex: 1; display: grid; grid-template-columns: 1.4fr 1fr; grid-template-rows: auto auto; gap: clamp(18px, 1.8vw, 28px) clamp(28px, 3vw, 48px); align-content: start; }
+  .ch-block { display: flex; flex-direction: column; }
+  .ch-block-label { font-size: clamp(10px, 0.9vw, 12px); letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 10px; }
+  .ch-block-body { font-size: clamp(13px, 1.1vw, 17px); color: var(--muted-on-dark); line-height: 1.5; }
+  .ch-block-body strong { color: var(--ink-on-dark); font-weight: 700; }
+  .ch-metrics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .ch-metric { background: rgba(111,160,212,0.10); border: 1px solid var(--accent-line); border-radius: 4px; padding: 6px 12px; font-size: clamp(11px, 1vw, 14px); color: var(--ink-on-dark); font-weight: 600; }
+  .ch-metric b { color: var(--accent); font-weight: 800; margin-right: 4px; }
+  .ch-owner-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: transparent; color: var(--ink-on-dark); border: 1px dashed var(--accent-line); border-radius: 4px; font-size: clamp(12px, 1.05vw, 15px); font-weight: 500; width: max-content; max-width: 100%; }
+  .ch-owner-chip::before { content: "↳"; color: var(--accent); font-weight: 700; }
+  .ch-impact { font-size: clamp(10px, 0.85vw, 12px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint-on-dark); font-weight: 700; margin-left: auto; }
+  .ch-impact b { color: var(--accent); }
+
+  /* ---------- THEME GRID ---------- */
+  .theme-grid { margin-top: clamp(20px, 2vw, 32px); display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.4vw, 22px); flex: 1; align-content: start; }
+  .theme-card { border: 1px solid var(--accent-line); border-left: 3px solid var(--accent); border-radius: 4px; padding: clamp(16px, 1.6vw, 24px); background: rgba(111, 160, 212, 0.05); }
+  .slide.light .theme-card { background: #f6f8fb; border-color: #dde3ea; border-left-color: var(--accent-deep); }
+  .theme-card .tc-title { font-size: clamp(14px, 1.2vw, 18px); font-weight: 700; color: var(--ink-on-dark); margin-bottom: 8px; line-height: 1.25; }
+  .slide.light .theme-card .tc-title { color: var(--ink-on-light); }
+  .theme-card .tc-body { font-size: clamp(12px, 1.05vw, 15px); color: var(--muted-on-dark); line-height: 1.45; }
+  .slide.light .theme-card .tc-body { color: var(--muted-on-light); }
+
+  /* ---------- OPPORTUNITY GROUPS ---------- */
+  .opp-groups { margin-top: clamp(20px, 2vw, 32px); display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(16px, 1.6vw, 24px); flex: 1; }
+  .opp-group { display: flex; flex-direction: column; gap: clamp(10px, 1vw, 14px); }
+  .opp-group-title { font-size: clamp(12px, 1vw, 15px); font-weight: 800; color: var(--accent-deep); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; padding-bottom: 8px; border-bottom: 1px solid var(--accent-line); }
+  .opp-item { font-size: clamp(12px, 1.05vw, 15px); color: var(--muted-on-light); line-height: 1.45; }
+  .opp-item strong { display: block; color: var(--ink-on-light); font-weight: 700; font-size: clamp(13px, 1.1vw, 16px); margin-bottom: 3px; }
+
+  /* ---------- POSTURE PILLARS ---------- */
+  .posture-pillars { margin-top: clamp(20px, 2vw, 32px); display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(16px, 1.6vw, 24px); flex: 1; align-content: start; }
+  .posture-card { background: #f6f8fb; border: 1px solid #dde3ea; border-radius: 8px; padding: clamp(18px, 1.8vw, 28px); }
+  .posture-card .pc-num { font-size: clamp(11px, 0.95vw, 13px); letter-spacing: 0.18em; color: var(--accent-deep); font-weight: 700; margin-bottom: 8px; }
+  .posture-card .pc-title { font-size: clamp(18px, 1.65vw, 26px); font-weight: 800; color: var(--ink-on-light); line-height: 1.15; margin-bottom: 10px; letter-spacing: -0.018em; }
+  .posture-card .pc-body { font-size: clamp(12px, 1.05vw, 15px); color: var(--muted-on-light); line-height: 1.5; }
+  .posture-card .pc-body strong { color: var(--ink-on-light); font-weight: 700; }
+
+  /* ---------- POD OVERVIEW ---------- */
+  .pod-grid { margin-top: clamp(12px, 1.2vw, 20px); flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: min-content; gap: clamp(10px, 1vw, 16px); align-content: start; }
+  .pod-card { border: 1px solid var(--accent-line); border-radius: 8px; padding: clamp(10px, 1vw, 16px) clamp(11px, 1.1vw, 16px); background: rgba(111, 160, 212, 0.06); display: flex; flex-direction: column; gap: clamp(6px, 0.6vw, 10px); }
+  .pod-head { display: flex; align-items: center; gap: 11px; }
+  .pod-badge { width: clamp(30px, 2.8vw, 40px); height: clamp(30px, 2.8vw, 40px); border-radius: 50%; background: var(--accent); color: var(--bg-dark); font-size: clamp(12px, 1.2vw, 16px); font-weight: 800; letter-spacing: -0.01em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pod-theme { font-size: clamp(12px, 1.05vw, 15px); font-weight: 700; color: var(--ink-on-dark); line-height: 1.12; letter-spacing: -0.01em; }
+  .pod-size { font-size: clamp(8px, 0.75vw, 10px); color: var(--faint-on-dark); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; margin-top: 2px; }
+  .pod-members { list-style: none; margin: 0; padding: 0; }
+  .pod-members li { font-size: clamp(9px, 0.85vw, 12px); padding: clamp(2px, 0.3vw, 4px) 0; border-top: 1px solid rgba(255,255,255,0.07); line-height: 1.22; color: var(--ink-on-dark); }
+  .pod-members li:first-child { border-top: none; }
+  .pm-name { font-weight: 700; }
+  .pm-name.pm-anchor { color: var(--accent); }
+  .pm-role { color: var(--faint-on-dark); font-weight: 400; }
+
+  /* ---------- POD-TO-CHALLENGE MAPPING ---------- */
+  .pod-map { margin-top: clamp(16px, 1.6vw, 24px); flex: 1; display: flex; flex-direction: column; gap: clamp(6px, 0.7vw, 10px); }
+  .pod-map-row { display: grid; grid-template-columns: 1fr 1.5fr 1.6fr; align-items: center; gap: clamp(14px, 1.4vw, 22px); padding: clamp(8px, 0.9vw, 13px) clamp(14px, 1.4vw, 22px); border: 1px solid #e6e9ed; border-left: 4px solid var(--accent-deep); border-radius: 6px; background: #fafbfc; }
+  .pod-map-id { display: flex; align-items: center; gap: clamp(10px, 1vw, 14px); }
+  .pod-map-id .pm-badge { width: clamp(28px, 2.8vw, 38px); height: clamp(28px, 2.8vw, 38px); border-radius: 50%; background: var(--accent-deep); color: #fff; font-size: clamp(12px, 1.2vw, 16px); font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pod-map-id .pm-theme { font-size: clamp(11px, 1vw, 15px); font-weight: 700; color: var(--ink-on-light); line-height: 1.15; letter-spacing: -0.01em; }
+  .pod-map-primary { display: flex; flex-direction: column; gap: 2px; }
+  .pod-map-primary .pm-label { font-size: clamp(9px, 0.8vw, 11px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-deep); font-weight: 700; }
+  .pod-map-primary .pm-title { font-size: clamp(12px, 1.1vw, 16px); color: var(--ink-on-light); font-weight: 700; line-height: 1.2; }
+  .pod-map-alt { display: flex; flex-direction: column; gap: 4px; }
+  .pod-map-alt .pm-label { font-size: clamp(9px, 0.8vw, 11px); letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint-on-light); font-weight: 600; }
+  .pm-alt-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pm-alt-chip { padding: 3px 9px; border: 1px solid #d3d9e0; border-radius: 999px; background: #fff; font-size: clamp(10px, 0.9vw, 12px); color: var(--muted-on-light); font-weight: 600; }
+  .pm-alt-chip b { color: var(--accent-deep); margin-right: 4px; font-weight: 800; }
+
+  /* ---------- CLOSING ---------- */
+  .slide-closing { justify-content: center; }
+  .slide-closing .quote-text { font-size: clamp(36px, 5.2vw, 80px); font-weight: 800; line-height: 1.08; letter-spacing: -0.024em; max-width: 22ch; }
+  .slide-closing .quote-attrib { margin-top: clamp(48px, 5vw, 80px); font-size: clamp(11px, 1vw, 14px); letter-spacing: 0.28em; text-transform: uppercase; color: var(--faint-on-dark); font-weight: 600; }
+
+  /* ---------- ENTRY ANIMATIONS ---------- */
+  .slide > * { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .slide.active > * { opacity: 1; transform: translateY(0); }
+  .slide.active > *:nth-child(1) { transition-delay: 0.10s; }
+  .slide.active > *:nth-child(2) { transition-delay: 0.18s; }
+  .slide.active > *:nth-child(3) { transition-delay: 0.26s; }
+  .slide.active > *:nth-child(4) { transition-delay: 0.34s; }
+  .slide.active > *:nth-child(5) { transition-delay: 0.42s; }
+  .slide.active > *:nth-child(6) { transition-delay: 0.50s; }
+
+  /* ---------- PROGRESS BAR ---------- */
+  .progress { position: fixed; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width 0.55s cubic-bezier(0.7, 0, 0.2, 1); z-index: 20; }
+
+  /* ---------- FOOTNOTE ---------- */
+  .foot { margin-top: clamp(18px, 1.8vw, 30px); padding-top: clamp(10px, 1vw, 16px); padding-right: clamp(96px, 11vw, 156px); border-top: 1px solid var(--accent-line); font-size: clamp(10px, 0.85vw, 12px); color: var(--faint-on-dark); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+  .slide.light .foot { color: var(--faint-on-light); border-top-color: #e6e9ed; }
+</style>
+</head>
+<body data-theme="dark">
+<div class="chrome">
+  <div class="logo">
+    <svg viewBox="0 0 217 60" xmlns="http://www.w3.org/2000/svg" aria-label="Tata Consultancy Services">
+      <g transform="translate(-40 108)">
+        <path d="M70.69 140.676C70.69 141.854 71.2791 142.813 72.8269 143.548 74.9637 144.579 78.4216 145.463 81.5172 145.463 85.419 145.463 88.6609 144.285 90.943 142.223 91.6797 141.56 92.2976 140.67 92.4236 139.499 92.7115 136.813 89.8799 132.328 84.0212 129.042 86.8696 130.639 87.5559 132.282 87.5559 134.419 87.5559 137.585 85.0519 139.721 81.4428 139.721 77.9837 139.721 75.0333 137.952 73.416 137.952 71.7986 137.952 70.69 139.055 70.69 140.676Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M109.877 107.192 114.944 107.192 114.944 98.1527 118.538 98.1527 118.538 94.5005 106.283 94.5005 106.283 98.1527 109.877 98.1527Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M122.274 107.192 124.855 99.6021 127.437 107.192 132.39 107.192 127.535 94.5005 122.174 94.5005 117.32 107.192Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M134.769 107.192 139.837 107.192 139.837 98.1527 143.43 98.1527 143.43 94.5005 131.175 94.5005 131.175 98.1527 134.769 98.1527Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M147.166 107.192 149.746 99.6021 152.328 107.192 157.282 107.192 152.428 94.5005 147.067 94.5005 142.213 107.192Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M195.788 116.268C196.458 117.771 197.217 119.234 198.063 120.645L201.371 126.227 203.772 126.227 203.772 113.537 201.628 113.537 201.628 117.964C201.628 119.904 201.672 121.537 201.835 123.224L201.792 123.237C201.17 121.772 200.447 120.352 199.63 118.984L196.35 113.536 193.703 113.536 193.703 126.227 195.846 126.227 195.846 121.682C195.846 119.598 195.816 117.923 195.725 116.276L195.788 116.268Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M184.28 122.641 188.309 122.641 189.458 126.227 191.945 126.227 187.822 113.537 184.871 113.537 180.798 126.227 183.195 126.227 184.28 122.641ZM185.639 117.754C185.861 116.998 186.058 116.12 186.243 115.373L186.282 115.373C186.474 116.107 186.679 116.972 186.926 117.754L187.927 120.882 184.658 120.882 185.639 117.754Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M146.496 124.508C145.422 124.5 144.368 124.221 143.43 123.698L142.916 125.618C143.61 126.043 145.003 126.428 146.346 126.428 149.623 126.428 151.161 124.654 151.161 122.612 151.161 120.789 150.103 119.68 147.896 118.84 146.201 118.193 145.467 117.735 145.467 116.762 145.467 116.014 146.092 115.233 147.564 115.233 148.445 115.227 149.314 115.434 150.099 115.836L150.655 113.966C149.993 113.63 148.984 113.338 147.611 113.338 144.858 113.338 143.12 114.905 143.12 116.982 143.12 118.8 144.46 119.925 146.56 120.67 148.164 121.252 148.809 121.817 148.809 122.776 148.803 123.815 147.977 124.508 146.496 124.508Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M113.175 115.251C114.024 115.242 114.866 115.41 115.646 115.746L116.151 113.902C115.681 113.647 114.605 113.339 113.076 113.339 109.197 113.339 106.283 115.853 106.283 120.033 106.283 123.895 108.736 126.428 112.767 126.428 114.301 126.428 115.509 126.127 116.059 125.851L115.676 124.025C115.063 124.299 114.089 124.485 113.146 124.485 110.356 124.485 108.727 122.712 108.727 119.916 108.724 116.866 110.585 115.251 113.175 115.251Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M177.978 126.227 177.978 115.485 181.638 115.485 181.638 113.537 172.034 113.537 172.034 115.485 175.66 115.485 175.66 126.227Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M224.315 113.537 222.787 116.787C222.354 117.713 222.002 118.497 221.689 119.301L221.651 119.301C221.303 118.441 220.976 117.719 220.543 116.787L219.036 113.537 216.389 113.537 220.403 120.947 220.403 126.229 222.721 126.229 222.721 120.882 226.937 113.538 224.315 113.537Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M122.871 113.329C119.286 113.329 116.827 116.082 116.827 119.98 116.827 123.695 119.096 126.437 122.683 126.437L122.701 126.437C126.177 126.437 128.755 124.007 128.755 119.753 128.757 116.126 126.572 113.329 122.871 113.329ZM122.78 124.578 122.762 124.578C120.546 124.578 119.25 122.444 119.256 119.921 119.264 117.398 120.474 115.183 122.786 115.183 125.098 115.183 126.289 117.446 126.289 119.84 126.289 122.498 125.019 124.581 122.779 124.581L122.78 124.578Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M212.669 115.251C213.518 115.242 214.362 115.411 215.141 115.746L215.647 113.902C215.175 113.647 214.1 113.339 212.571 113.339 208.691 113.339 205.777 115.853 205.777 120.033 205.777 123.895 208.23 126.428 212.261 126.428 213.795 126.428 215.003 126.128 215.553 125.851L215.17 124.025C214.557 124.302 213.583 124.486 212.64 124.486 209.85 124.486 208.221 122.712 208.221 119.916 208.219 116.866 210.079 115.251 212.669 115.251Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M168.104 113.537 165.783 113.537 165.783 126.229 173.322 126.229 173.322 124.282 168.104 124.282Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M163.145 120.786 163.145 113.537 160.825 113.537 160.825 120.936C160.825 123.423 159.821 124.57 158.151 124.57 156.579 124.57 155.55 123.416 155.55 120.936L155.55 113.537 153.232 113.537 153.232 120.797C153.232 124.789 155.14 126.436 158.067 126.436 161.133 126.437 163.145 124.696 163.145 120.786Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M140.814 113.537 138.67 113.537 138.67 117.964C138.67 119.904 138.713 121.537 138.876 123.224L138.833 123.237C138.21 121.772 137.488 120.351 136.671 118.984L133.392 113.536 130.745 113.536 130.745 126.227 132.891 126.227 132.891 121.682C132.891 119.598 132.86 117.923 132.768 116.276L132.828 116.263C133.497 117.767 134.257 119.229 135.104 120.64L138.412 126.223 140.814 126.223 140.814 113.537Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M148.413 132.572 150.731 132.572 150.731 145.263 148.413 145.263Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M132.475 139.314 132.475 139.261C133.666 138.84 134.763 137.735 134.763 136.113 134.763 135.033 134.366 134.162 133.679 133.586 132.83 132.877 131.365 132.571 129.794 132.571 128.627 132.553 127.46 132.644 126.309 132.842L126.309 145.263 128.591 145.263 128.591 140.087 129.749 140.087C131.057 140.118 131.654 140.65 132.015 142.291 132.366 143.856 132.669 144.894 132.861 145.263L135.225 145.263C134.972 144.771 134.63 143.326 134.231 141.752 133.916 140.528 133.386 139.659 132.475 139.314ZM129.949 138.398 128.589 138.398 128.589 134.421C129.059 134.33 129.539 134.291 130.018 134.306 131.505 134.306 132.47 134.952 132.47 136.325 132.47 137.577 131.509 138.398 129.949 138.398Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M142.73 138.378C142.239 139.919 141.776 141.469 141.44 142.967L141.4 142.967C141.07 141.433 140.638 139.947 140.156 138.344L138.424 132.573 135.894 132.573 139.997 145.264 142.655 145.264 147.042 132.573 144.575 132.573 142.73 138.378Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M166.775 139.633 171.558 139.633 171.558 137.741 166.775 137.741 166.775 134.481 171.843 134.481 171.843 132.572 164.456 132.572 164.456 145.264 172.123 145.264 172.123 143.356 166.775 143.356Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M159.621 134.287C160.47 134.277 161.314 134.446 162.094 134.781L162.599 132.937C162.127 132.682 161.051 132.374 159.524 132.374 155.643 132.374 152.729 134.895 152.729 139.068 152.729 142.93 155.183 145.463 159.213 145.463 160.747 145.463 161.956 145.163 162.505 144.886L162.122 143.06C161.509 143.337 160.535 143.522 159.592 143.522 156.802 143.522 155.173 141.747 155.173 138.952 155.167 135.902 157.028 134.287 159.621 134.287Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M111.262 137.876C109.567 137.23 108.834 136.771 108.834 135.798 108.834 135.051 109.459 134.27 110.93 134.27 111.81 134.264 112.68 134.47 113.465 134.872L114.02 133.003C113.359 132.667 112.35 132.374 110.976 132.374 108.225 132.374 106.487 133.941 106.487 136.018 106.487 137.837 107.826 138.962 109.927 139.706 111.532 140.289 112.176 140.854 112.176 141.812 112.176 142.851 111.348 143.544 109.869 143.544 108.795 143.536 107.742 143.258 106.805 142.735L106.29 144.654C106.983 145.079 108.376 145.464 109.72 145.464 112.997 145.464 114.534 143.691 114.534 141.649 114.527 139.825 113.466 138.716 111.262 137.876Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M118.93 139.633 123.711 139.633 123.711 137.741 118.93 137.741 118.93 134.481 123.998 134.481 123.998 132.572 116.61 132.572 116.61 145.264 124.276 145.264 124.276 143.356 118.93 143.356Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M178.578 137.876C176.883 137.23 176.148 136.771 176.148 135.798 176.148 135.051 176.774 134.27 178.246 134.27 179.126 134.264 179.996 134.47 180.781 134.872L181.336 133.003C180.675 132.667 179.666 132.374 178.293 132.374 175.54 132.374 173.802 133.941 173.802 136.018 173.802 137.837 175.142 138.962 177.241 139.706 178.846 140.289 179.491 140.854 179.491 141.812 179.491 142.851 178.663 143.544 177.186 143.544 176.112 143.536 175.058 143.258 174.12 142.735L173.605 144.654C174.299 145.079 175.692 145.464 177.035 145.464 180.312 145.464 181.849 143.691 181.849 141.649 181.842 139.825 180.781 138.716 178.578 137.876Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M30.4071 144.577C33.3575 143.474 35.6359 141.411 37.1093 138.392L33.7954 132.427C32.322 136.845 29.746 139.202 26.2101 139.202 22.5291 139.202 20.0982 137.065 20.0982 132.206L20.0202 135.002C19.3723 140.934 22.913 146.216 30.4071 144.577Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M38.5827 125.361C38.5827 138.546 43.8847 145.91 60.6751 143.403 66.0503 140.605 69.8801 134.933 72.5305 126.244L74.0771 121.163C72.6049 119.248 72.0158 117.114 72.0158 114.83 72.0158 112.399 72.8989 110.191 74.3722 108.571 72.1622 110.927 70.3228 114.389 68.8494 119.253L67.1553 124.848C64.1329 134.71 59.3517 139.423 51.9115 139.423 43.7372 139.423 38.5827 133.753 38.5827 125.361Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M60.6739 143.4C43.8883 145.904 38.5827 136.92 38.5827 125.362 38.5827 116.967 43.7372 111.222 51.1749 111.222 53.6177 111.204 56.0329 111.732 58.2454 112.769 59.2029 113.211 60.0128 113.358 60.7494 113.358 62.5168 113.358 63.695 112.18 63.695 110.408 63.695 109.304 63.0327 108.199 61.4861 107.462 58.6881 106.062 55.0767 105.252 51.1761 105.252 39.5414 105.252 31.5134 113.501 31.5134 125.504 31.5134 137.287 39.245 145.462 51.692 145.462 55.0791 145.462 58.0234 144.799 60.6739 143.4Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M31.5122 125.505C31.5122 113.501 39.5402 105.253 51.1749 105.253 55.0779 105.253 58.6869 106.067 61.4849 107.463 63.0315 108.2 63.6938 109.305 63.6938 110.409 63.6938 112.177 62.5156 113.359 60.7482 113.359 60.0116 113.359 59.2017 113.212 58.2442 112.77 56.0317 111.736 53.6165 111.207 51.1737 111.224 40.9392 111.221 31.5122 117.699 31.5122 125.505Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M75.4773 107.611C74.8138 108.244 74.4406 109.124 74.4454 110.042 74.4454 112.471 76.7287 116.08 82.0319 119.762L88.0706 123.959C92.4884 127.052 94.2557 129.997 94.2557 134.416 94.2557 137.583 93.0043 140.307 90.9418 142.222 91.6785 141.559 92.12 140.676 92.12 139.497 92.12 136.92 89.5416 132.87 84.0188 129.041L78.496 125.212C73.8563 121.973 72.0158 118.953 72.0158 114.829 72.0158 112.398 72.8989 110.189 74.3722 108.57 74.7214 108.228 75.0909 107.908 75.4773 107.611Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M82.0307 119.766C79.673 118.072 78.6436 116.527 78.6436 114.685 78.6436 112.329 80.5585 110.856 83.2821 110.856 86.7412 110.856 88.3682 112.476 90.4259 112.476 92.0468 112.476 93.1507 111.372 93.1507 109.751 93.1507 108.573 92.5616 107.615 91.0138 106.879 88.5829 105.701 85.9277 105.258 83.0602 105.258 80.0414 105.258 77.3898 106.142 75.4749 107.616 74.8114 108.249 74.4382 109.129 74.443 110.047 74.4454 112.47 76.7287 116.079 82.0307 119.766Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M13.0277 112.765C13.0277 108.348 15.9001 105.696 20.0982 105.696L20.0982 98.1839C20.0982 95.9739 18.6249 94.5017 16.5636 94.5017 14.5023 94.5017 13.0289 95.975 13.0289 98.1839L13.0289 112.765Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+        <path d="M25.5478 145.389C27.2024 145.395 28.8449 145.119 30.4071 144.575 22.9694 145.828 20.1726 140.709 20.0982 135.003L20.0982 111.44 28.7142 111.44C30.7035 111.44 32.0281 110.261 32.0281 108.567 32.0281 106.873 30.7059 105.695 28.7142 105.695L20.0982 105.695C15.9001 105.695 13.0277 108.346 13.0277 112.764L13.0277 133.016C13.0277 141.117 17.6674 145.389 25.5478 145.389Z" transform="matrix(1 0 0 1.00952 27.5194 -199.649)"/>
+      </g>
+    </svg>
+  </div>
+  <div class="counter"><b id="cur">1</b> / <span id="total">34</span></div>
+  <div class="nav-buttons">
+    <button class="nav-btn" id="prev" aria-label="Previous slide">‹</button>
+    <button class="nav-btn" id="next" aria-label="Next slide">›</button>
+  </div>
+</div>
+<div class="progress" id="progress" style="width:2.94%"></div>
+<div class="deck"><div class="track" id="track">
+<section class="slide slide-cover active" data-theme="dark">
+  <div class="eyebrow">AI Immersion Day · TSF Group</div>
+  <h1 class="hero">TSF <span class="accent">Group</span>.</h1>
+  <p class="lede">A Rapid Build immersion across the <span class="accent">TSF Group</span> enterprises of the T. S. Santhanam family — one century-old house, many businesses, working as one for a day.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="meta-label">Audience</div><div class="meta-value">78 senior leaders</div></div>
+    <div class="meta-item"><div class="meta-label">Method</div><div class="meta-value">Rapid Build</div></div>
+    <div class="meta-item"><div class="meta-label">Output</div><div class="meta-value">10 tables · 20 challenge cards</div></div>
+  </div>
+</section>
+<section class="slide" data-theme="dark">
+  <div class="eyebrow">Section 01 · Group snapshot</div>
+  <h2 class="heading">One lineage, <span class="accent">many businesses</span>.</h2>
+  <div class="two-col">
+    <div class="col-narrative">
+      <p><strong>TSF Group</strong> originates from the <strong>T. S. Santhanam family</strong> (part of the erstwhile TVS Group) — a Chennai-rooted house operating across <strong>automotive components, auto distribution &amp; dealerships, and finance &amp; insurance</strong>, plus charitable trusts.</p>
+      <p><strong>Auto components &amp; manufacturing:</strong> Brakes India, Wheels India, Turbo Energy, Axles India, ABI Showatec, Sundaram Composites, BIADS, Sundaram Dynacast. <strong>Distribution:</strong> IMPAL, Sundaram Motors, Madras Auto Service.</p>
+      <p><strong>Finance &amp; insurance:</strong> Sundaram Finance, Sundaram Home Finance, Sundaram AMC, Sundaram Alternates, Royal Sundaram, Sundaram Business Services, TSF Investments. <strong>Social trusts:</strong> Sundaram Medical Foundation, Laxmi Charities.</p>
+      <p>It is a <strong>federation of structurally different businesses</strong> — different regulators, data realities and AI readiness — held together by common values.</p>
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card"><div class="metric-label">Heritage</div><div class="metric-value">Since 1911</div><div class="metric-sub">Over a century of legacy</div></div>
+      <div class="metric-card"><div class="metric-label">Consolidated turnover</div><div class="metric-value">$3.7B</div><div class="metric-sub">FY25 (FY24: $3.5B)</div></div>
+      <div class="metric-card"><div class="metric-label">Business entities</div><div class="metric-value">15</div><div class="metric-sub">Across three verticals</div></div>
+      <div class="metric-card"><div class="metric-label">Manufacturing plants</div><div class="metric-value">36+</div><div class="metric-sub">Pan-India + overseas</div></div>
+      <div class="metric-card"><div class="metric-label">Global talent</div><div class="metric-value">42,000+</div><div class="metric-sub">Two-culture workforce</div></div>
+      <div class="metric-card"><div class="metric-label">Branches</div><div class="metric-value">1,200+</div><div class="metric-sub">Multi-vertical footprint</div></div>
+    </div>
+  </div>
+  <div class="foot">Source · TSF Group FY2026 corporate deck · figures as publicly stated</div>
+</section>
+<section class="slide light" data-theme="light">
+  <div class="eyebrow">Section 02 · Legacy &amp; values</div>
+  <h2 class="heading">Values that <span class="accent-deep">built a legacy</span>.</h2>
+  <div class="posture-pillars" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="posture-card"><div class="pc-num">Heritage</div><div class="pc-title">Over a century of legacy.</div><div class="pc-body">From humble beginnings since <strong>1911</strong> into an internationally recognised enterprise spanning automotive and financial services.</div></div>
+    <div class="posture-card"><div class="pc-num">Quality</div><div class="pc-title">Pioneers in quality.</div><div class="pc-body">Played a key role in advancing the <strong>quality movement in India</strong> — a reputation built on customer satisfaction and ethical practice.</div></div>
+    <div class="posture-card"><div class="pc-num">Core values</div><div class="pc-title">Trust · Service · Respect.</div><div class="pc-body">The five values that hold the federation together: <strong>Trust, Service, Respect, Value and Quality</strong> — "common values, diverse ventures".</div></div>
+    <div class="posture-card"><div class="pc-num">Reach</div><div class="pc-title">Global presence.</div><div class="pc-body">Operations and customers across India and overseas, from manufacturing plants to a 1,200-branch financial-services network.</div></div>
+    <div class="posture-card"><div class="pc-num">Breadth</div><div class="pc-title">Diverse business interests.</div><div class="pc-body">Auto components, auto distribution &amp; dealerships, and finance &amp; insurance — plus social trusts in healthcare and education.</div></div>
+    <div class="posture-card" style="background: var(--accent-deep); border-color: var(--accent-deep);"><div class="pc-num" style="color:#fff;">People</div><div class="pc-title" style="color:#fff;">Strong core ethos.</div><div class="pc-body" style="color:rgba(255,255,255,0.9);">Known for <strong style="color:#fff;">customer satisfaction, ethical business and employee welfare</strong> across 42,000+ people.</div></div>
+  </div>
+  <div class="foot">Source · TSF Group FY2026 corporate deck — "Common Values; Diverse Ventures"</div>
+</section>
+<section class="slide" data-theme="dark">
+  <div class="eyebrow">Section 04 · Portfolio context</div>
+  <h2 class="heading">A <span class="accent">federation</span> of unlike businesses.</h2>
+  <div class="theme-grid">
+    <div class="theme-card"><div class="tc-title">Heavy manufacturing</div><div class="tc-body">Foundry, machining, precision components and powertrain. Shop-floor data sits in SCADA/historians, often apart from ERP and quality records.</div></div>
+    <div class="theme-card"><div class="tc-title">Auto distribution &amp; aftermarket</div><div class="tc-body">Largely private businesses — dealership retail, multi-brand parts and service across a wide branch-and-dealer network.</div></div>
+    <div class="theme-card"><div class="tc-title">Lending — RBI / NHB</div><div class="tc-body">A leading NBFC plus housing finance: vehicle, SME, leasing and home-loan credit across ~600 branches and a deep regional network.</div></div>
+    <div class="theme-card"><div class="tc-title">Investments &amp; insurance — SEBI / IRDAI</div><div class="tc-body">Asset management, alternatives and general insurance — different regulators, products and operating rhythms again.</div></div>
+    <div class="theme-card"><div class="tc-title">Shared services &amp; social trusts</div><div class="tc-body">A BPM arm, a not-for-profit hospital and a charitable trust — internal and community-facing operations with their own data sensitivities.</div></div>
+    <div class="theme-card" style="border-left-color:#fff;"><div class="tc-title">Two explicit digital mandates</div><div class="tc-body">A <strong>CIDO at Brakes India</strong> and a <strong>CTDO at Sundaram Finance</strong> signal where group AI ambition is anchored — manufacturing and lending.</div></div>
+  </div>
+  <div class="foot">Source · TCS deep-research briefs · regulators and structure per the topology brief</div>
+</section>
+<section class="slide light" data-theme="light">
+  <div class="eyebrow">Section 05 · Forces shaping the agenda</div>
+  <h2 class="heading">Six forces <span class="accent-deep">pressing</span> on the group at once.</h2>
+  <div class="theme-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="theme-card"><div class="tc-title">EV transition &amp; OEM quality pressure</div><div class="tc-body">OEMs push returned-defect targets ever lower while powertrains shift — raising the bar on quality and new-product speed across manufacturing.</div></div>
+    <div class="theme-card"><div class="tc-title">Margin &amp; working-capital discipline</div><div class="tc-body">Conversion cost, scrap, inventory and trapped working capital are the controllable levers as margins tighten.</div></div>
+    <div class="theme-card"><div class="tc-title">Regulatory tightening</div><div class="tc-body">RBI scale-based regulation, NHB norms, Digital Lending, SEBI/IRDAI conduct and the DPDP Act all raise the bar on traceable, fair decisions.</div></div>
+    <div class="theme-card"><div class="tc-title">Fragmented data estate</div><div class="tc-body">Each separately-owned entity holds its own master data, with no group data office — every cross-entity question is manual today.</div></div>
+    <div class="theme-card"><div class="tc-title">Talent &amp; workforce scarcity</div><div class="tc-body">Skilled-trade and financial-services talent is scarce; attrition, hiring and routine load sit in disconnected HR functions.</div></div>
+    <div class="theme-card" style="background: var(--accent-deep); color:#fff; border-color: var(--accent-deep); border-left-color:#fff;"><div class="tc-title" style="color:#fff;">The convergence</div><div class="tc-body" style="color:rgba(255,255,255,0.88);">Higher expectations, tighter margins, scarce talent and fragmented data — all at once. Each business must prove value while keeping trust.</div></div>
+  </div>
+  <div class="foot">Source · synthesis of the TSF deep-research briefs</div>
+</section>
+<section class="slide light" data-theme="light">
+  <div class="eyebrow">Section 06 · AI opportunity surface</div>
+  <h2 class="heading-md">Ten <span class="accent-deep">broad</span> themes the room can build on.</h2>
+  <div class="opp-groups" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="opp-group"><div class="opp-group-title">Grow &amp; serve</div><div class="opp-item"><strong>Coordinated growth</strong>Demand across the multi-vertical footprint.</div><div class="opp-item"><strong>One-group customer</strong>Experience &amp; trust across entities.</div></div>
+    <div class="opp-group"><div class="opp-group-title">Run well</div><div class="opp-item"><strong>First-time-right quality</strong>Operational excellence across plants.</div><div class="opp-item"><strong>Decisions at scale</strong>Faster, more consistent judgements.</div></div>
+    <div class="opp-group"><div class="opp-group-title">Enable</div><div class="opp-item"><strong>Consent-safe data &amp; AI</strong>Shared enablement across entities.</div><div class="opp-item"><strong>Workforce</strong>Augmenting a 42,000 two-culture base.</div></div>
+    <div class="opp-group"><div class="opp-group-title">Protect</div><div class="opp-item"><strong>Risk &amp; resilience</strong>Regulatory trust across entities.</div><div class="opp-item"><strong>Sustainability &amp; impact</strong>ESG and the social trusts.</div></div>
+    <div class="opp-group"><div class="opp-group-title">Compound</div><div class="opp-item"><strong>Lifecycle value</strong>Retention across the journey.</div><div class="opp-item"><strong>Capital &amp; cash</strong>Efficiency across the group.</div></div>
+  </div>
+  <div class="foot">Each theme is framed as a problem — participants design the solutions in the room.</div>
+</section>
+<section class="slide" data-theme="dark">
+  <div class="eyebrow">Section 07 · The room</div>
+  <h2 class="heading">Seventy-eight leaders. <span class="accent">Ten tables.</span></h2>
+  <div class="two-col">
+    <div class="col-narrative">
+      <p>The TSF team has organised the room into <strong>ten cross-functional tables</strong>. Unlike a domain-by-domain split, each table deliberately mixes auto components, distribution, finance &amp; insurance and the social trusts.</p>
+      <p>The design mirrors the group's own identity — <strong>"common values, diverse ventures"</strong> — so every table can take a <em>broad</em>, group-level challenge that no single business owns alone.</p>
+      <p>Each table carries one Primary and one Secondary challenge through ideation and a first-cut build. Every participant is placed exactly once.</p>
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card"><div class="metric-label">Participants</div><div class="metric-value">78</div><div class="metric-sub">All placed exactly once</div></div>
+      <div class="metric-card"><div class="metric-label">Working tables</div><div class="metric-value">10</div><div class="metric-sub">Cross-functional mixes</div></div>
+      <div class="metric-card"><div class="metric-label">Entities represented</div><div class="metric-value">19</div><div class="metric-sub">Across the three verticals + trusts</div></div>
+      <div class="metric-card"><div class="metric-label">Challenge cards</div><div class="metric-value">20</div><div class="metric-sub">1 Primary + 1 Secondary per table</div></div>
+    </div>
+  </div>
+  <div class="foot">Roster &amp; tables per the TSF team's updated participant list</div>
+</section>
+<section class="slide" data-theme="dark">
+  <div class="eyebrow">Section 08 · The winning challenges</div>
+  <h2 class="heading-md">Ten tables, ten <span class="accent">winning</span> challenges.</h2>
+  <div class="ci-grid"><div class="ci-card" data-jump="12"><div class="ci-num">T1 · Primary</div><div class="ci-title">Coordinated Group Growth</div><div class="ci-domain">Growth / where-to-play · +1 secondary</div></div><div class="ci-card" data-jump="14"><div class="ci-num">T2 · Primary</div><div class="ci-title">Group-Wide First-Time-Right Quality</div><div class="ci-domain">Quality / first-time-right · +1 secondary</div></div><div class="ci-card" data-jump="16"><div class="ci-num">T3 · Primary</div><div class="ci-title">Disjointed Customer Experience</div><div class="ci-domain">Customer experience / relationship · +1 secondary</div></div><div class="ci-card" data-jump="18"><div class="ci-num">T4 · Primary</div><div class="ci-title">Working Capital Across The Chain</div><div class="ci-domain">Working capital / cash-to-cash · +1 secondary</div></div><div class="ci-card" data-jump="20"><div class="ci-num">T5 · Primary</div><div class="ci-title">One Group, One Customer (Identity)</div><div class="ci-domain">Customer identity / single view · +1 secondary</div></div><div class="ci-card" data-jump="22"><div class="ci-num">T6 · Primary</div><div class="ci-title">Trust You Can Demonstrate</div><div class="ci-domain">Trust / provenance / proof · +1 secondary</div></div><div class="ci-card" data-jump="24"><div class="ci-num">T7 · Primary</div><div class="ci-title">Frontline Capability At Scale</div><div class="ci-domain">Frontline ramp &amp; consistency · +1 secondary</div></div><div class="ci-card" data-jump="26"><div class="ci-num">T8 · Primary</div><div class="ci-title">Group Operational Excellence</div><div class="ci-domain">Shared back-office / process · +1 secondary</div></div><div class="ci-card" data-jump="28"><div class="ci-num">T9 · Primary</div><div class="ci-title">Connected Supply-Demand Signal</div><div class="ci-domain">Demand sensing / planning · +1 secondary</div></div><div class="ci-card" data-jump="30"><div class="ci-num">T10 · Primary</div><div class="ci-title">Consolidated Group Cash View</div><div class="ci-domain">Group treasury / cash visibility · +1 secondary</div></div></div>
+  <div class="foot">Tournament winners (supervisor's set vs ours) · tap a card to open its detail</div>
+</section>
+<section class="slide" data-theme="dark">
+  <div class="eyebrow">Section 09 · Table assignment · 1 of 2</div>
+  <h2 class="heading-sm">Seating — <span class="accent">Tables 1–5</span>.</h2>
+  <div class="pod-grid"><div class="pod-card"><div class="pod-head"><div class="pod-badge">T1</div><div><div class="pod-theme">Coordinated Group Growth</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Sriram Viji</span><span class="pm-role"> · MD, Brakes India</span></li><li><span class="pm-name">Suresh S</span><span class="pm-role"> · President (EMCE), Wheels India</span></li><li><span class="pm-name">Haygreevan</span><span class="pm-role"> · Executive Director &amp; CFO, Turbo Energy Limited</span></li><li><span class="pm-name">Gopal Maloo</span><span class="pm-role"> · Executive Vice President, Madras Auto Service</span></li><li><span class="pm-name">Salin Nair</span><span class="pm-role"> · Senior General Manager &amp; Head - North, Sundaram Finance</span></li><li><span class="pm-name">Kumaresh Balasubramanian</span><span class="pm-role"> · General Manager - Projects, HD &amp; SD Channels, Sundaram Home</span></li><li><span class="pm-name">Lakshmi H</span><span class="pm-role"> · Chief Business Operations Officer, Sundaram AMC</span></li><li><span class="pm-name">Arjun Sankar</span><span class="pm-role"> · Fund Manager, Sundaram Alternates</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T2</div><div><div class="pod-theme">Group-Wide First-Time-Right Quality</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Balaji Krishna</span><span class="pm-role"> · President-Foundry, Brakes India</span></li><li><span class="pm-name">Srivats Ram</span><span class="pm-role"> · Chairman &amp; Managing Director, Wheels India</span></li><li><span class="pm-name">R Balaji</span><span class="pm-role"> · Vice President, Turbo Energy Limited</span></li><li><span class="pm-name">Yuvaraj</span><span class="pm-role"> · Head, Sundaram Dynacast</span></li><li><span class="pm-name">Sunil S Narayanan</span><span class="pm-role"> · Senior General Manager &amp; Head - MP, Chhattisgarh &amp; East Region, Sundaram Finance</span></li><li><span class="pm-name">Shankar Thiagarajan</span><span class="pm-role"> · Senior General Manager &amp; Dy Head - Karnataka, Sundaram Finance</span></li><li><span class="pm-name">Raghunathan RS</span><span class="pm-role"> · Chief Financial Officer, Sundaram AMC</span></li><li><span class="pm-name">Arjun Rangarajan</span><span class="pm-role"> · Director, Sundaram Medical Foundation</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T3</div><div><div class="pod-theme">Disjointed Customer Experience</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Madhu</span><span class="pm-role"> · ED- Corporate Affairs, Brakes India</span></li><li><span class="pm-name">Ranjan Ambirajan</span><span class="pm-role"> · Executive - Sales, Wheels India</span></li><li><span class="pm-name">Anant Ramanujam</span><span class="pm-role"> · Executive Chairman, Turbo Energy Limited</span></li><li><span class="pm-name">Sharath Vijayaraghavan</span><span class="pm-role"> · Executive Director, Sundaram Motors</span></li><li><span class="pm-name">Ramaswamy M</span><span class="pm-role"> · Chief Financial Officer, Sundaram Finance</span></li><li><span class="pm-name">Manoj Nair</span><span class="pm-role"> · Senior General Manager &amp; Head - Distribution, Sundaram Finance</span></li><li><span class="pm-name">Hema Ganapathy</span><span class="pm-role"> · Chief Operating Officer, Sundaram Home</span></li><li><span class="pm-name">Vedanarayanan Seshadri</span><span class="pm-role"> · Managing Director, Royal Sundaram General Insurance</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T4</div><div><div class="pod-theme">Working Capital Across The Chain</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Krishnan P</span><span class="pm-role"> · President- LVBU, Brakes India</span></li><li><span class="pm-name">Murali Vaidyanathan</span><span class="pm-role"> · President (Automotive), Wheels India</span></li><li><span class="pm-name">Mr. R. Badrinath</span><span class="pm-role"> · General Manager - Human Resources, Axles India</span></li><li><span class="pm-name">SS Ram</span><span class="pm-role"> · Executive Vice President-Cars, Sundaram Motors</span></li><li><span class="pm-name">Ramachandran N</span><span class="pm-role"> · Executive Director, Sundaram Finance</span></li><li><span class="pm-name">Rahul Jyothi Kumaran</span><span class="pm-role"> · Senior General Manager &amp; Head - SME &amp; SCF, Sundaram Finance</span></li><li><span class="pm-name">Anand Radhakrishnan</span><span class="pm-role"> · Managing Director, Sundaram AMC</span></li><li><span class="pm-name">Shyamsunder TM</span><span class="pm-role"> · Chief Operating Officer, Royal Sundaram General Insurance</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T5</div><div><div class="pod-theme">One Group, One Customer (Identity)</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Ramya Sampathkumar</span><span class="pm-role"> · SVP, CIDO, Brakes India</span></li><li><span class="pm-name">Ramesh</span><span class="pm-role"> · CFO, Wheels India</span></li><li><span class="pm-name">Aditya Ramanujam</span><span class="pm-role"> · Executive Director- ABI Showatec, ABI Showatec</span></li><li><span class="pm-name">Mukund Raghavan</span><span class="pm-role"> · Managing Director, IMPAL</span></li><li><span class="pm-name">Sudheer Warrier</span><span class="pm-role"> · Chief Technology &amp; Digital Officer, Sundaram Finance</span></li><li><span class="pm-name">Narayanan K</span><span class="pm-role"> · Senior General Manager &amp; Head - Leasing &amp; CAG, Sundaram Finance</span></li><li><span class="pm-name">Ganapathi Subramanian S</span><span class="pm-role"> · Chief Human Resources Officer, Sundaram Home</span></li><li><span class="pm-name">Vaibhav Kabra</span><span class="pm-role"> · Chief Financial Officer, Royal Sundaram General Insurance</span></li></ul></div></div>
+  <div class="foot">78 of 78 placed · table numbers per the TSF team · Tables 1–5 of 10</div>
+</section>
+<section class="slide" data-theme="dark">
+  <div class="eyebrow">Section 09 · Table assignment · 2 of 2</div>
+  <h2 class="heading-sm">Seating — <span class="accent">Tables 6–10</span>.</h2>
+  <div class="pod-grid"><div class="pod-card"><div class="pod-head"><div class="pod-badge">T6</div><div><div class="pod-theme">Trust You Can Demonstrate</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Bheemsingh M</span><span class="pm-role"> · President, HVBU, Brakes India</span></li><li><span class="pm-name">Ravindran</span><span class="pm-role"> · Executive Director, Turbo Energy Limited</span></li><li><span class="pm-name">S Ramasubramanian</span><span class="pm-role"> · CFO, IMPAL</span></li><li><span class="pm-name">Harsha Viji</span><span class="pm-role"> · Executive Vice Chairman, Sundaram Finance</span></li><li><span class="pm-name">Tom Thomas</span><span class="pm-role"> · Senior General Manager &amp; Head - West, Sundaram Finance</span></li><li><span class="pm-name">Vinay V Singhvi</span><span class="pm-role"> · Zonal Head - South &amp; East, Sundaram Alternates</span></li><li><span class="pm-name">Sathish Kumar S</span><span class="pm-role"> · Chief Distribution Officer - Commercial, Royal Sundaram General Insurance</span></li><li><span class="pm-name">Shyamala Ashok</span><span class="pm-role"> · CEO, Laxmi Charities</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T7</div><div><div class="pod-theme">Frontline Capability At Scale</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Venkataswami Babu</span><span class="pm-role"> · Vice President (HR), Wheels India</span></li><li><span class="pm-name">K. Vijay Anand</span><span class="pm-role"> · Deputy General Manager - Product Development &amp; Engineering, Axles India</span></li><li><span class="pm-name">Tirumalai</span><span class="pm-role"> · COO, Sundaram Composites</span></li><li><span class="pm-name">Jacob</span><span class="pm-role"> · CEO, Madras Auto Service</span></li><li><span class="pm-name">Rajiv C Lochan</span><span class="pm-role"> · Managing Director, Sundaram Finance</span></li><li><span class="pm-name">Rajesh Venkat</span><span class="pm-role"> · Senior Vice President - Head TN, Sundaram Finance</span></li><li><span class="pm-name">Loganathan CM</span><span class="pm-role"> · Chief Business Officer, Sundaram AMC</span></li><li><span class="pm-name">Ramesh Babu</span><span class="pm-role"> · Chief Distribution Officer - Retail, Royal Sundaram General Insurance</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T8</div><div><div class="pod-theme">Group Operational Excellence</div><div class="pod-size">8 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Sujit Nayak</span><span class="pm-role"> · SVP, AMBU, Brakes India</span></li><li><span class="pm-name">Sanjay Pande</span><span class="pm-role"> · Senior Vice President (Mktg), Wheels India</span></li><li><span class="pm-name">M Vanamurthy</span><span class="pm-role"> · Vice President, Turbo Energy Limited</span></li><li><span class="pm-name">Suryanarayanan D</span><span class="pm-role"> · Senior General Manager-Finance, Sundaram Motors</span></li><li><span class="pm-name">Jeevan Jose</span><span class="pm-role"> · Senior General Manager &amp; Zonal Head - Salem &amp; Dharmapuri, Sundaram Finance</span></li><li><span class="pm-name">Sri Raman</span><span class="pm-role"> · Deputy Region Head - Telangana, Sundaram Finance</span></li><li><span class="pm-name">Laks</span><span class="pm-role"> · Managing Director, Sundaram Home</span></li><li><span class="pm-name">Deepa Ramesh</span><span class="pm-role"> · CEO, Sundaram Business Services</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T9</div><div><div class="pod-theme">Connected Supply-Demand Signal</div><div class="pod-size">7 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Mukundanarayanan</span><span class="pm-role"> · Senior General Manager(Accounts), Wheels India</span></li><li><span class="pm-name">Madhavan Varadarajan</span><span class="pm-role"> · Managing Director, Axles India</span></li><li><span class="pm-name">KVP Krishnadas</span><span class="pm-role"> · Head, BIADS</span></li><li><span class="pm-name">Bama Balakrishnan</span><span class="pm-role"> · Senior Vice President - Finance, Sundaram Finance</span></li><li><span class="pm-name">Nishant P</span><span class="pm-role"> · Chief Business Officer, Sundaram Home</span></li><li><span class="pm-name">Karthik Athreya</span><span class="pm-role"> · Managing Director, Sundaram Alternates</span></li><li><span class="pm-name">Srikant Ramanjum</span><span class="pm-role"> · MD, ABI Showatec</span></li></ul></div><div class="pod-card"><div class="pod-head"><div class="pod-badge">T10</div><div><div class="pod-theme">Consolidated Group Cash View</div><div class="pod-size">7 · cross-functional</div></div></div><ul class="pod-members"><li><span class="pm-name pm-anchor">Rajeev Kapoor</span><span class="pm-role"> · Head-Operations, Wheels India</span></li><li><span class="pm-name">Ashok Kumar Yadav</span><span class="pm-role"> · Vice President, Turbo Energy Limited</span></li><li><span class="pm-name">Krishnamoorthy Y</span><span class="pm-role"> · Chief Financial Officer, Axles India</span></li><li><span class="pm-name">Raju AN</span><span class="pm-role"> · Joint Managing Director, Sundaram Finance</span></li><li><span class="pm-name">Muralidharan V</span><span class="pm-role"> · Senior General Manager &amp; Head - S&amp;P, Sundaram Finance</span></li><li><span class="pm-name">Bharath S</span><span class="pm-role"> · Sr Fund Manager, Sundaram AMC</span></li><li><span class="pm-name">S Ravi</span><span class="pm-role"> · CEO, TSF Investments</span></li></ul></div></div>
+  <div class="foot">78 of 78 placed · table numbers per the TSF team · Tables 6–10 of 10</div>
+</section>
+<section class="slide light" data-theme="light">
+  <div class="eyebrow">Section 09 · Table-to-challenge mapping · 1 of 2</div>
+  <h2 class="heading-md">Each table: a <span class="accent-deep">primary</span> and a secondary · Tables 1–5.</h2>
+  <div class="pod-map"><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T1</div><div class="pm-theme">Growth / where-to-play</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Coordinated Group Growth</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Common Consent-Safe Data Sharing</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T2</div><div class="pm-theme">Quality / first-time-right</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Group-Wide First-Time-Right Quality</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">One Environmental Picture</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T3</div><div class="pm-theme">Customer experience / relationship</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Disjointed Customer Experience</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Consistent Frontline Decisions</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T4</div><div class="pm-theme">Working capital / cash-to-cash</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Working Capital Across The Chain</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Freeing People For Higher Work</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T5</div><div class="pm-theme">Customer identity / single view</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">One Group, One Customer (Identity)</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Augmenting The Everyday Expert</span></div></div></div></div>
+  <div class="foot">Tables 1–5 of 10 · all 20 cards follow as detail slides</div>
+</section>
+<section class="slide light" data-theme="light">
+  <div class="eyebrow">Section 09 · Table-to-challenge mapping · 2 of 2</div>
+  <h2 class="heading-md">Each table: a <span class="accent-deep">primary</span> and a secondary · Tables 6–10.</h2>
+  <div class="pod-map"><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T6</div><div class="pm-theme">Trust / provenance / proof</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Trust You Can Demonstrate</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Consolidated Multi-Regulator Posture</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T7</div><div class="pm-theme">Frontline ramp &amp; consistency</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Frontline Capability At Scale</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Anticipating The Next Need</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T8</div><div class="pm-theme">Shared back-office / process</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Group Operational Excellence</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Reusable Shared-Services Spine</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T9</div><div class="pm-theme">Demand sensing / planning</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Connected Supply-Demand Signal</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Resilience To Common Shocks</span></div></div></div><div class="pod-map-row"><div class="pod-map-id"><div class="pm-badge">T10</div><div class="pm-theme">Group treasury / cash visibility</div></div><div class="pod-map-primary"><div class="pm-label">Primary</div><div class="pm-title">Consolidated Group Cash View</div></div><div class="pod-map-alt"><div class="pm-label">Secondary</div><div class="pm-alt-chips"><span class="pm-alt-chip">Consistent Capital Allocation</span></div></div></div></div>
+  <div class="foot">Tables 6–10 of 10 · all 20 cards follow as detail slides</div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T1 · P</span><span>Coordinated Group Growth</span><span class="ch-domain">Growth / where-to-play</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">No one holds a single group view of where the 1,200-branch, multi-vertical footprint is under- or over-served.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Each entity grows on its own map, so a town strong in finance may be blind in insurance, parts or savings — and the group can neither see the white space nor sequence its expansion. <em>Around this table:</em> a lender, a manufacturer, an AMC and a parts house each &quot;know their patch&quot; but none sees the household or region as a whole.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Footprints are large enough that overlap and gaps now cost real growth, and consented data finally makes a shared view possible.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">1,200+ branches</div><div class="ch-metric">15 entities</div><div class="ch-metric">SF 600 br</div><div class="ch-metric">AMC 71,816 distributors</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Consent-safe data only; respect RBI/SEBI/IRDAI segregation; no cross-entity pooling without governance.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.30):</b> A1/A2 broad but no anchors; B-S narrower.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T1 · S</span><span>Common Consent-Safe Data Sharing</span><span class="ch-domain">Data governance / enablement</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">There is no common, consent-safe way for entities to share data or AI capability; each rebuilds governance, models and guardrails alone, with no group AI centre to reuse.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Every entity stands up its own data controls, model governance and guardrails from zero, so effort is duplicated, standards drift and no shared spine exists to build on. <em>Around this table:</em> a regulated lender, an insurer, a fund house and a manufacturer each solve the same governance problem from scratch.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">AI ambition rises across all entities while a federated structure leaves no shared spine, multiplying cost and risk.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">15 entities</div><div class="ch-metric">federated, no group AI CoE</div><div class="ch-metric">RBI/NHB/SEBI/IRDAI</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Process · Build M · Guardrails</div><div class="ch-block-body">Regulator-specific data residency; consent ledger; no commingling of regulated datasets.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 3.85):</b> A2 leader-view overlaps T10; re-themed to governance.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T2 · P</span><span>Group-Wide First-Time-Right Quality</span><span class="ch-domain">Quality / first-time-right</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">Plants define &quot;good&quot; differently, so there is no group view of quality or yield, and a defect learned in one plant is not shared with the next.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Foundry yield sits at 55–65%, so a third or more of effort is scrapped or reworked — and a lesson learned on one line rarely reaches the next. <em>Around this table:</em> a brake maker, a wheel maker, a turbo maker and a die-caster each carry their own quality language with no common standard.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Yield gaps are large and persistent, and customers increasingly demand demonstrable, consistent quality.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Brakes India 16 plants</div><div class="ch-metric">foundry yield 55–65%</div><div class="ch-metric">Wheels India</div><div class="ch-metric">Sundaram Dynacast</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Plant-floor data stays with owning entity; no use that overrides safety-critical sign-off.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 4.30):</b> A1 &quot;see trouble early&quot; weaker anchors, moved to T9.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T2 · S</span><span>One Environmental Picture</span><span class="ch-domain">Environment / sustainability</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Energy and emissions across 36+ factories are told plant-by-plant, so the group has no consolidated environmental picture to manage, report or improve against.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Each site reports its own meters in its own format, so no one can add them up, benchmark plant against plant, or steer the group's energy and emissions as a single number. <em>Around this table:</em> every plant tracks its own meters, but no one can see or steer the group footprint.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Reporting and decarbonisation expectations are rising and a fragmented view blocks credible commitments.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">36+ factories</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Verified-data only for any external disclosure; avoid unsubstantiated claims.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 3.75):</b> A2 planning overlaps T9; environment distinct &amp; anchored.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T3 · P</span><span>Disjointed Customer Experience</span><span class="ch-domain">Customer experience / relationship</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">A customer who is financed, insured and serviced by the group arrives as a fresh stranger at every touchpoint, because no one holds the whole relationship.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">The same person is re-asked, re-verified and re-sold at every step, so effort is wasted and the next genuine need goes unseen. <em>Around this table:</em> a dealer financing a vehicle, an insurer covering it and a service arm maintaining it each see only their slice of the same customer.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Customers expect to be recognised, and the data to join the relationship exists but is siloed.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">SF 600 br</div><div class="ch-metric">Royal Sundaram 27.39 lakh policies</div><div class="ch-metric">AMC 3.5M+ investors</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Consent-gated identity resolution; honour IRDAI/RBI data-use limits.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.40):</b> A1 relationship vivid but unanchored; B-P anchored.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T3 · S</span><span>Consistent Frontline Decisions</span><span class="ch-domain">Decision speed &amp; consistency</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Daily credit, pricing, claims and quote decisions are slower and more uneven than they should be, varying by which branch or assessor handles them and leaning on manual judgement and scattered information.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Outcomes depend on who happens to handle the case and what they can find, so similar customers get different answers, decisions take longer and value leaks. <em>Around this table:</em> a credit officer, a claims assessor and a service advisor each decide differently for similar cases.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Volume and customer expectations make uneven, manual decisions a growing source of leakage and unfairness.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">SF net stage-3 0.69%</div><div class="ch-metric">Royal Sundaram 3.68 lakh claims</div><div class="ch-metric">SF 600 br</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Human-in-the-loop on adverse decisions; audit trail; fair-lending/IRDAI compliance.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 3.70):</b> A2 front-line decisions; B-S anchors imported.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T4 · P</span><span>Working Capital Across The Chain</span><span class="ch-domain">Working capital / cash-to-cash</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">Working capital is trapped across the make-sell-finance chain as inventory, receivables and float that no single owner sees end to end.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Each link optimises its own balance sheet while cash sits idle in the gaps between them, so the chain as a whole carries far more working capital than it needs. <em>Around this table:</em> a manufacturer holding stock, a dealer network carrying receivables and a financier funding the float each manage a fragment of one flow.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Rates and demand swings make trapped cash expensive, and the chain spans group entities that could net it.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Axles India 400k housings/yr</div><div class="ch-metric">IMPAL ~89 br, ~18,000 dealers</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Arm&#x27;s-length inter-entity terms; no regulated-lending bias; transfer-pricing compliance.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 4.30):</b> A1/A2 repeat T3/T8 themes; cash-chain distinct.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T4 · S</span><span>Freeing People For Higher Work</span><span class="ch-domain">Productivity / talent leverage</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Skilled people spend too much of their time on repetitive, rules-based tasks across F&amp;A, dealership finance and fund or loan operations, which caps their impact and the group&#x27;s capacity to grow.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Hours go to checking, matching and keying work a machine could handle, so expert judgement is spent on routine throughput and manual capacity becomes the ceiling on growth. <em>Around this table:</em> an underwriter, a fund-ops analyst and a dealership accountant all lose hours to work a machine could check.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Talent is scarce and volumes are rising, so manual throughput is a hard ceiling on growth.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">42,000+ employees</div><div class="ch-metric">15 entities</div><div class="ch-metric">SBS 400+ professionals</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · AI-Automation · Build H · Guardrails</div><div class="ch-block-body">Maker-checker retained; no autonomous action on regulated transactions.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (A, 3.85):</b> B-S &quot;at-risk relationships&quot; overlaps T7-S; re-themed.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TSF_Immersion_Challenges.html</b> (supervisor).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T5 · P</span><span>One Group, One Customer (Identity)</span><span class="ch-domain">Customer identity / single view</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">The same household or business appears as unrelated records across entities, so the group cannot recognise a consented shared customer even when it is plainly the same party.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">A dealer buying parts, financing stock and insuring it shows up as three unconnected customers, so the group cannot join a relationship it already has. <em>Around this table:</em> a parts house, a financier and an insurer each hold a different key to the same identity.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Identity resolution is now technically feasible and the cost of treating one customer as many is rising.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">SF 600 br</div><div class="ch-metric">Royal Sundaram 27.39 lakh policies</div><div class="ch-metric">AMC ₹76,008 cr AUM / 3.5M investors</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Consent-first matching; entity-level access controls; regulator data-use limits.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.45):</b> A2 relationship vivid; B-P anchored; merged.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T5 · S</span><span>Augmenting The Everyday Expert</span><span class="ch-domain">Knowledge access at point of need</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Hard-won know-how is locked in a few experienced heads and scattered documents, and the frontline cannot reach it at the moment a decision is made.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">When that knowledge is needed most it cannot be reached, so decisions wait on a phone call, repeat an old mistake, or default to the safest guess. <em>Around this table:</em> a foundry veteran, a senior underwriter and a master technician each hold answers their teams cannot find in time.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Senior experts are retiring while frontline numbers grow, widening the gap between need and knowledge.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">42,000+ employees</div><div class="ch-metric">36+ factories</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Process · Build M · Guardrails</div><div class="ch-block-body">Source-cited answers; no fabricated guidance on safety-critical work.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.05):</b> A burden / B-S knowledge; expert-access strongest.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T6 · P</span><span>Trust You Can Demonstrate</span><span class="ch-domain">Trust / provenance / proof</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">Trust is carried by reputation, but customers and partners increasingly want it shown in the moment — a genuine part proven against a fake, a claim settled openly, a donation traced to its outcome.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Today that proof is manual, slow or simply unavailable, so trust rests on being believed rather than being shown in the moment. <em>Around this table:</em> a parts maker, an insurer and a charity each rely on being believed rather than being able to demonstrate.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Counterfeits, claim disputes and donor scrutiny all rise, and demonstrable provenance is becoming an expectation, not a differentiator.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Laxmi 200,000+ students</div><div class="ch-metric">SMF 230+ beds, 30% free OP / 15% free IP</div><div class="ch-metric">Royal Sundaram 27.39 lakh policies</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Process · Build M · Guardrails</div><div class="ch-block-body">Verifiable records only; no overstated provenance claims; Trust-data privacy honoured.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.55):</b> A1 trust vivid; B social anchors imported; best-of-both.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T6 · S</span><span>Consolidated Multi-Regulator Posture</span><span class="ch-domain">Compliance / risk posture</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Four separately regulated entities each carry their own compliance, cyber and incident-reporting, so the group has no consolidated risk and obligation posture.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Each entity assesses threats, logs incidents and answers its regulator on its own terms, so the group cannot see its total exposure or respond to a shared risk as one. <em>Around this table:</em> a bank-like lender, an insurer, a fund house and a home-finance arm each face their regulator alone.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Cyber and reporting obligations are intensifying and fragmented posture raises both cost and exposure.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Royal Sundaram 27.39 lakh policies</div><div class="ch-metric">SF 600 br</div><div class="ch-metric">RBI/NHB/SEBI/IRDAI</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Regulator-specific segregation; no shared view that breaches confidentiality rules.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 3.75):</b> A2 responsiveness moved to T7-S; regulator posture distinct.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T7 · P</span><span>Frontline Capability At Scale</span><span class="ch-domain">Frontline ramp &amp; consistency</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">New and frontline staff ramp slowly and execute inconsistently across a manufacturing and a financial-services culture, and engineering or operating know-how lives in senior people and scattered docs so teams reinvent answers.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Without a shared playbook, capability is rebuilt person by person and answers are reinvented team by team, so ramp-up is slow and execution swings across the two cultures. <em>Around this table:</em> a shop-floor lead, a branch officer and a service desk each onboard and decide differently with no shared playbook.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Hiring is scaling across two cultures while experienced staff thin out, so inconsistent execution compounds.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">42,000+ employees</div><div class="ch-metric">1,200+ branches</div><div class="ch-metric">36+ factories</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Process · Build M · Guardrails</div><div class="ch-block-body">Cited, approved sources; no autonomous customer-facing advice without review.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.15):</b> A1 knowledge + B-P ramp; two-culture framing.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T7 · S</span><span>Anticipating The Next Need</span><span class="ch-domain">Next-best-need / retention</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">The group cannot anticipate a customer&#x27;s next need across the sell-finance-insure-service journey, and interested or existing customers slip away between touchpoints when follow-up depends on manual memory — a test-drive gone cold, a policy not renewed.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Follow-up depends on someone remembering, so warm intent cools between touchpoints and the obvious next step — a renewal, a service, a cross-sell — is quietly missed. <em>Around this table:</em> a dealer, a financier and an insurer each see one moment but not the next.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Follow-up is manual and leak-prone while customers expect timely, relevant outreach.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">SF 600 br</div><div class="ch-metric">Royal Sundaram 27.39 lakh policies</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Consent-based outreach; honour do-not-contact and cross-sell limits.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 3.85):</b> A2 retention + B-S next-need merged.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T8 · P</span><span>Group Operational Excellence</span><span class="ch-domain">Shared back-office / process</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Back-office functions run independently in every entity, repeating the same effort and delivering uneven service for work that is heavy, repeatable and largely common.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">The same heavy, repeatable work is stood up separately in every entity, so effort is duplicated and service levels swing depending on which team happens to run it. <em>Around this table:</em> an F&amp;A team, a dealership finance desk and a fund-ops unit each rebuild the same process.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Cost pressure and volume growth make duplicated back-office a clear, addressable drag.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">15 entities</div><div class="ch-metric">42,000+ employees</div><div class="ch-metric">1,200+ branches</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · AI-Automation · Build H · Guardrails</div><div class="ch-block-body">Entity data segregation; maker-checker; no regulated-process automation without sign-off.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 3.95):</b> A2 &quot;freeing people&quot; used at T4-S; back-office distinct.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T8 · S</span><span>Reusable Shared-Services Spine</span><span class="ch-domain">Shared-services platform</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">A proven business-process management capability already exists in one entity but is not offered as a reusable spine the rest of the group can plug into.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">That engine stays captive to the entity that built it, so the rest of the group re-solves problems it has already cracked instead of plugging into a shared capability. <em>Around this table:</em> a fund administrator, a mortgage-broker servicer and a group F&amp;A team each could draw on the same engine but do not.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Demand for managed processing is rising and a ready capability is being under-leveraged.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">SBS 400+ professionals</div><div class="ch-metric">SMSF ~5,000 funds/yr</div><div class="ch-metric">3,600+ mortgage brokers</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Process · Build H · Guardrails</div><div class="ch-block-body">Client-data confidentiality; clear inter-entity service terms.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 3.70):</b> A1 doc-burden absorbed; spine distinct.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T9 · P</span><span>Connected Supply-Demand Signal</span><span class="ch-domain">Demand sensing / planning</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">The same end-demand reaches plants as lagged, separate signals as it passes plant to dealer to lender, so by the time it shows in plant numbers it is too late to respond gently and a ramp drifting or a segment turning is seen late.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Demand is read late and in pieces, so a ramp drifting or a segment turning shows up in plant numbers only after the moment to respond gently has passed. <em>Around this table:</em> a wheel plant, an axle line and a financier each read a different, delayed echo of the same demand.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Demand and cost swing faster than planning cycles, making lagged signals expensive in stock and capacity.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Wheels India +15%</div><div class="ch-metric">Axles India 400k housings/yr</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Forecasts advisory, not binding; no anti-competitive demand-sharing across customers.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (Synthesis, 4.30):</b> A1 see-trouble + B-P demand signal merged.<br><span style="color:var(--faint-on-dark);">Picked from: synthesis of <b>TSF_Immersion_Challenges.html</b> (supervisor) + <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T9 · S</span><span>Resilience To Common Shocks</span><span class="ch-domain">Supply-chain resilience / risk</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Safety-critical and aerospace entities each carry supply-chain and resilience planning separately, so the group&#x27;s exposure to a common shock — a shared supplier, region or input — is unmapped.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Because resilience is planned entity by entity, a shared supplier, region or input can sit behind several businesses at once with no one able to see the concentrated risk. <em>Around this table:</em> an aerospace pivot, an axle maker and a brakes supplier may depend on the same single point without anyone knowing.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Concentration and geopolitical risk are rising while resilience is managed entity-by-entity.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">ABI aerospace capex ₹80–100 cr</div><div class="ch-metric">Axles India 400k housings/yr</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Supplier-data confidentiality; defence/aerospace export-control limits.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 3.90):</b> A2 knowledge repeats T7; resilience novel &amp; anchored.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T10 · P</span><span>Consolidated Group Cash View</span><span class="ch-domain">Group treasury / cash visibility</span><span class="ch-impact">Impact <b>5/5</b></span></div>
+  <h2 class="ch-statement">Cash and free cash sit on 15 balance sheets with no near-current consolidated view, so the group cannot see what is trapped versus idle or move it where it earns most.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">Balances are visible only entity by entity and only after the fact, so the group cannot tell what is genuinely trapped from what is merely idle, or move money to where it earns most. <em>Around this table:</em> a manufacturer holding free cash, a deposit-taking financier and a fund house each see only their own till.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Rate volatility makes idle and trapped cash costly, and a near-real-time group view is now feasible.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Turbo Energy ₹986 cr free cash</div><div class="ch-metric">Wheels India debt/EBITDA ~3.4×</div><div class="ch-metric">SF deposits ₹8,873 cr</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">No commingling of regulated deposits; respect ring-fencing and statutory liquidity rules.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 4.30):</b> A1 leader-view unanchored; cash view anchored.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide challenge-detail" data-theme="dark">
+  <div class="ch-tag"><span class="ch-num">T10 · S</span><span>Consistent Capital Allocation</span><span class="ch-domain">Capital allocation discipline</span><span class="ch-impact">Impact <b>4/5</b></span></div>
+  <h2 class="ch-statement">Capital is deployed entity-by-entity against different yardsticks, so the group cannot compare returns or sequence investment on a common basis.</h2>
+  <div class="ch-grid">
+    <div class="ch-block"><div class="ch-block-label">The challenge</div><div class="ch-block-body">With no common yardstick, each entity makes its own case for capital, so returns cannot be compared like-for-like and investment cannot be sequenced across the group. <em>Around this table:</em> a turbo maker, an aerospace pivot and the investment arm each justify capital their own way.</div></div>
+    <div class="ch-block"><div class="ch-block-label">Why now</div><div class="ch-block-body">Large, lumpy capex decisions are in play and inconsistent hurdles risk misallocation.</div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">Anchors</div><div class="ch-metrics"><div class="ch-metric">Turbo Energy ₹986 cr free cash</div><div class="ch-metric">ABI capex ₹80–100 cr</div><div class="ch-metric">TSF Investments</div></div></div>
+    <div class="ch-block" style="grid-column: 1 / -1;"><div class="ch-block-label">AI-fit · Analytics-ML · Build M · Guardrails</div><div class="ch-block-body">Advisory framework only; board retains allocation authority.</div></div>
+  </div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--accent-line);font-size:clamp(11px,1vw,14px);line-height:1.45;color:var(--muted-on-dark);"><b style="color:var(--accent);">Why this won (B, 3.75):</b> A2 doc-burden absorbed; capital allocation distinct.<br><span style="color:var(--faint-on-dark);">Picked from: <b>TVS-Group-AI-Immersion-Day.html</b> (ours).</span></div>
+</section>
+<section class="slide light" data-theme="light">
+  <div class="eyebrow">Section 10 · What we still need from the client</div>
+  <h2 class="heading-md">Open questions to <span class="accent-deep">validate</span> on the day.</h2>
+  <ol class="theme-list numbered" style="columns: 2; column-gap: clamp(36px,4vw,72px); margin-top: clamp(18px,1.8vw,26px);"><li>**T1-P Coordinated Group Growth** — no branch-by-vertical, region-by-region coverage map; &quot;under/over-served&quot; is asserted, not quantified.</li><li>**T2-S One Environmental Picture** — factory count (36+) is known but no baseline energy/emissions figures.</li><li>**T6-P Trust You Can Demonstrate** — no counterfeit-incidence or claim-dispute rates; the provenance anchors are qualitative.</li><li>**T9-S Resilience To Common Shocks** — no shared-supplier or single-source concentration data; common-shock exposure is hypothesised.</li><li>**T10-P Consolidated Group Cash View** — free-cash exists for Turbo and SF deposits, but most of the 15 entities&#x27; cash positions are absent, so a group &quot;trapped vs idle&quot; total cannot be computed.</li></ol>
+  <div class="foot">Where the strongest winning card needs a fact the research pack does not contain</div>
+</section>
+<section class="slide slide-closing" data-theme="dark">
+  <svg class="quote-glyph" viewBox="0 0 80 60" aria-hidden="true"><polygon points="5,5 25,0 25,55 5,55" fill="currentColor"/><polygon points="38,5 58,0 58,55 38,55" fill="currentColor"/></svg>
+  <p class="quote-text">Pick a <span class="accent">challenge</span>. Build the evidence. <span class="accent">Decide</span> in the room.</p>
+  <div class="quote-attrib">TSF Group · T. S. Santhanam enterprises · AI Immersion Day · TCS Rapid Build</div>
+</section>
+</div></div>
+<script>
+  const track = document.getElementById('track');
+  const slides = track.querySelectorAll('.slide');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const curEl = document.getElementById('cur');
+  const totalEl = document.getElementById('total');
+  const progress = document.getElementById('progress');
+
+  let current = 0;
+  const total = slides.length;
+  totalEl.textContent = total;
+
+  function go(i) {
+    current = Math.max(0, Math.min(total - 1, i));
+    track.style.transform = `translateX(-${current * (100 / total)}%)`;
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+    curEl.textContent = current + 1;
+    progress.style.width = `${((current + 1) / total) * 100}%`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+    const theme = slides[current].getAttribute('data-theme') || 'dark';
+    document.body.setAttribute('data-theme', theme);
+  }
+
+  prevBtn.addEventListener('click', () => go(current - 1));
+  nextBtn.addEventListener('click', () => go(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(current + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(total - 1); }
+    else if (e.key.toLowerCase() === 'f') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.nav-btn') || e.target.closest('.chrome') || e.target.closest('.ci-card')) return;
+    const x = e.clientX;
+    if (x > window.innerWidth * 0.6) go(current + 1);
+    else if (x < window.innerWidth * 0.4) go(current - 1);
+  });
+
+  document.querySelectorAll('.ci-card[data-jump]').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      const target = parseInt(card.getAttribute('data-jump'), 10);
+      if (!isNaN(target)) go(target);
+    });
+  });
+
+  go(0);
+</script>
+</body>
+</html>
