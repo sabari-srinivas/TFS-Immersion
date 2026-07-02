@@ -61,6 +61,34 @@ representative sample data, integration points, and relevant guardrails
     label: "Build",
     text: `You are a product design expert. Using only the brief above, write a single [platform] product requirements prompt for {{company}} that includes Product name + one liner description (actions, process, capabilities), who it's for, screens + key components, brand colors, main user flow, sample data, concise headlines/CTAs, UI instructions, success metric card, constraints (no PII). Return the [platform] prompt only`,
   },
+  {
+    step: 6,
+    label: "Storyboard",
+    text: `Turn the brief above into a single storyboard of the pilot as a flow. The flow is the storyboard: no UI descriptions, no screen mock-ups.
+
+FLOW FIRST, DRAWING SECOND
+Before rendering anything, write the flow as an explicit edge list: every connection as (from-node -> to-node, one-bracketed-word label if it is a fallback or escape hatch). Every rendering below must be generated from this edge list. Never draw an arrow that is not in the list; never draw an arrow by visual position alone.
+
+RENDERING
+Render the flowchart inline in the chat — not a file: a single vertical column of boxes, top to bottom. Draw a downward arrow ONLY between consecutive boxes that are directly connected in the edge list. For every edge that is NOT a consecutive forward step — backward edges, jumps, and all fallback/escape-hatch edges — do NOT draw a connector: render it as a small labelled chip on the source box (e.g. "[reject] -> 4") and a matching entry chip on the target box (e.g. "from 7"). Mark AI steps and the human decision visibly (an [AI] tag on the box; the decision node in a distinct colour) and add a one-line legend. Keep box text short and legible; the column may scroll vertically. If inline rendering is unavailable, fall back to a plain-text flowchart in a code block: every line under 60 characters, jump targets by node number only (e.g. --> [6]), vertical flow.
+
+FLOW RULES (apply in every rendering)
+- Walk the golden path end to end, from trigger to outcome, labelling who acts at each step (persona, system, or human decision-maker).
+- Mark every step where AI does work with [AI], and the final human decision with [HUMAN DECIDES].
+- 8-12 nodes maximum. Render at most 3 fallback/escape-hatch edges — the ones the room must see; fold the rest into captions.
+- NUMBER nodes in reading order, top to bottom down the single column. Renumber the edge list to match the final layout before rendering — no gaps or jumps in the sequence.
+- Add a one-line caption under the chart only for nodes whose box text alone is unclear.
+
+VERIFY (always, after the chart, as plain text in the chat)
+Print the edge list as a short table: FROM | TO | LABEL. Then check every rendered connector and chip against it and state either "ARROWS VERIFIED AGAINST EDGE LIST" or name the mismatch and fix it before continuing.
+
+UNDER THE FLOWCHART, as plain text in the chat (never inside the diagram), exactly three lines:
+STARTS WHEN: ...
+ENDS WHEN: ...
+THE METRIC MOVES BECAUSE: ...
+
+Then stop and ask the room: "Does this flow match what you think we are building? Name anything wrong or missing before the demo." Do not anticipate or invent corrections yourself — stop after asking and wait for the room's reply. Apply at most one round of corrections from the room — the corrected flow is the walkthrough script the demo is judged against.`,
+  },
 ];
 
 function fill(text: string, challenge: Challenge | null): string {
